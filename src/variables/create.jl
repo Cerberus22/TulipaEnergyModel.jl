@@ -10,6 +10,8 @@ function compute_variables_indices(connection)
         key => TulipaVariable(connection, "var_$key") for key in (
             :flow,
             :units_on,
+            :start_up,
+            :shut_down,
             :is_charging,
             :storage_level_rep_period,
             :storage_level_over_clustered_year,

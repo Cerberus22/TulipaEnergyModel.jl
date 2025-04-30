@@ -29,6 +29,9 @@ function compute_constraints_indices(connection)
             :transport_flow_limit_simple_method,
             :group_max_investment_limit,
             :group_min_investment_limit,
+            :su_sd_eq_units_on_diff,
+            :start_up,
+            :shut_down,
         )
     )
 

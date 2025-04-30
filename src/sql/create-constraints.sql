@@ -407,3 +407,112 @@ where
 
 drop sequence id
 ;
+
+create sequence id start 1
+;
+
+create table cons_start_up as
+select
+    nextval('id') as id,
+    t_high.asset,
+    t_high.year,
+    t_high.rep_period,
+    t_high.time_block_start,
+    t_high.time_block_end
+from
+    asset_time_resolution_rep_period as atr
+    join
+    t_highest_assets_and_out_flows as t_high
+        on
+            atr.asset = t_high.asset and
+            atr.time_block_start = t_high.time_block_start
+    join asset
+        on
+            asset.asset = t_high.asset
+where
+    asset.type in ('producer', 'conversion')
+    and asset.unit_commitment = true
+order by
+    t_high.asset,
+    t_high.year,
+    t_high.rep_period,
+    t_high.time_block_start
+;
+
+drop sequence id
+;
+
+create sequence id start 1
+;
+
+create table cons_shut_down as
+select
+    nextval('id') as id,
+    t_high.asset,
+    t_high.year,
+    t_high.rep_period,
+    t_high.time_block_start,
+    t_high.time_block_end,
+from
+    asset_time_resolution_rep_period as atr
+    join
+    t_highest_assets_and_out_flows as t_high
+        on
+            atr.asset = t_high.asset and
+            atr.time_block_start = t_high.time_block_start
+    join asset
+        on
+            asset.asset = t_high.asset
+where
+    asset.type in ('producer', 'conversion')
+    and asset.unit_commitment = true
+order by
+    t_high.asset,
+    t_high.year,
+    t_high.rep_period,
+    t_high.time_block_start
+;
+
+drop sequence id
+;
+
+create sequence id start 1
+;
+
+create table cons_su_sd_eq_units_on_diff as
+with ranked as (
+    select
+        nextval('id') as id,
+        t_high.asset,
+        t_high.year,
+        t_high.rep_period,
+        t_high.time_block_start,
+        t_high.time_block_end,
+        row_number() over (
+            partition by asset.asset
+            order by
+                t_high.asset,
+                t_high.year,
+                t_high.rep_period,
+                t_high.time_block_start
+        ) as rn
+    from
+        asset_time_resolution_rep_period as atr
+        join t_highest_assets_and_out_flows as t_high
+            on atr.asset = t_high.asset
+            and atr.time_block_start = t_high.time_block_start
+        join asset
+            on asset.asset = t_high.asset
+    where
+        asset.type in ('producer', 'conversion')
+        and asset.unit_commitment = true
+)
+select id, asset, year, rep_period, time_block_start, time_block_end
+from ranked
+where rn > 1
+order by asset, year, rep_period, time_block_start;
+;
+
+
+drop sequence id
+;
