@@ -411,7 +411,7 @@ drop sequence id
 create sequence id start 1
 ;
 
-create table cons_start_up as
+create table cons_start_up_upper_bound as
 select
     nextval('id') as id,
     t_high.asset,
@@ -445,7 +445,7 @@ drop sequence id
 create sequence id start 1
 ;
 
-create table cons_shut_down as
+create table cons_shut_down_upper_bound as
 select
     nextval('id') as id,
     t_high.asset,

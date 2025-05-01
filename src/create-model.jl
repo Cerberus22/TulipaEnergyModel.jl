@@ -178,7 +178,7 @@ function create_model(
         profiles,
     )
 
-    @timeit to "add_start_up_constraints!" add_start_up_constraints!(
+    @timeit to "add_start_up_upper_bound_constraints!" add_start_up_upper_bound_constraints!(
         connection,
         model,
         variables,
@@ -186,7 +186,7 @@ function create_model(
         constraints,
     )
 
-    @timeit to "add_shut_down_constraints!" add_shut_down_constraints!(
+    @timeit to "add_shut_down_upper_bound_constraints!" add_shut_down_upper_bound_constraints!(
         connection,
         model,
         variables,

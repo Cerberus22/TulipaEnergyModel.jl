@@ -1,16 +1,23 @@
-export add_shut_down_constraints!
+export add_shut_down_upper_bound_constraints!
 
 """
-    add_shut_down_constraints!(model, constraints)
+    add_shut_down_upper_bound_constraints!(model, constraints)
 
 Adds the shut down constraints to the model.
 """
-function add_shut_down_constraints!(connection, model, variables, expressions, constraints)
-    let table_name = :shut_down, cons = constraints[:shut_down]
+function add_shut_down_upper_bound_constraints!(
+    connection,
+    model,
+    variables,
+    expressions,
+    constraints,
+)
+    let table_name = :shut_down_upper_bound, cons = constraints[:shut_down_upper_bound]
         expr_avail_simple_method =
             expressions[:available_asset_units_simple_method].expressions[:assets]
 
-        indices = _append_available_units_shut_down_simple_method(connection, :shut_down)
+        indices =
+            _append_available_units_shut_down_simple_method(connection, :shut_down_upper_bound)
 
         attach_constraint!(
             model,

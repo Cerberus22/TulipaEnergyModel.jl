@@ -1,12 +1,18 @@
-export add_start_up_constraints!
+export add_start_up_upper_bound_constraints!
 
 """
-    add_start_up_constraints!(model, constraints)
+    add_start_up_upper_bound_constraints!(model, constraints)
 
 Adds the start up constraints to the model.
 """
-function add_start_up_constraints!(connection, model, variables, expressions, constraints)
-    let table_name = :start_up, cons = constraints[:start_up]
+function add_start_up_upper_bound_constraints!(
+    connection,
+    model,
+    variables,
+    expressions,
+    constraints,
+)
+    let table_name = :start_up_upper_bound, cons = constraints[:start_up_upper_bound]
         attach_constraint!(
             model,
             cons,
