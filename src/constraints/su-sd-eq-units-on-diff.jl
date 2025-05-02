@@ -25,11 +25,9 @@ function add_su_sd_eq_units_on_diff_constraints!(
                 variables[:units_on].container,
             ),
         )
-            if (ind.asset == last_asset)
-                push!(startup_container, su)
-                push!(shutdown_container, sd)
-                push!(units_on_now_container, uo)
-            end
+            push!(startup_container, su)
+            push!(shutdown_container, sd)
+            push!(units_on_now_container, uo)
             last_asset = ind.asset
         end
 
@@ -38,10 +36,8 @@ function add_su_sd_eq_units_on_diff_constraints!(
         indices = collect(variables[:units_on].indices)
         container = collect(variables[:units_on].container)
 
-        for i in (1:(length(indices)-1))
-            if indices[i].asset == indices[i+1].asset
-                push!(units_on_prev_container, container[i])
-            end
+        for i in (1:length(indices))
+            push!(units_on_prev_container, container[i])
         end
 
         attach_constraint!(
