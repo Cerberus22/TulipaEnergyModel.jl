@@ -167,7 +167,8 @@
       "constraints": {
         "oneOf": [
           null,
-          "basic"
+          "basic",
+          "min_up_down"
         ]
       },
       "default": null,

@@ -202,6 +202,14 @@ function create_model(
         constraints,
     )
 
+    @timeit to "add_minimum_up_time_constraints!" add_minimum_up_time_constraints!(
+        connection,
+        model,
+        variables,
+        expressions,
+        constraints,
+    )
+
     if model_file_name != ""
         @timeit to "save model file" JuMP.write_to_file(model, model_file_name)
     end
