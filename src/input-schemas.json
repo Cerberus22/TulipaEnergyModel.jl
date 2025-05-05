@@ -185,7 +185,9 @@
       "constraints": {
         "oneOf": [
           null,
-          "basic"
+          "basic",
+          "su-sd-cons-eq-7",
+          "su-sd-cons-eq-9"
         ]
       },
       "default": null,
