@@ -291,6 +291,49 @@ function add_objective!(connection, model, variables, expressions, model_paramet
         )
     )
 
+    indices = DuckDB.query(
+        connection,
+        "SELECT
+            var.id,
+            t_objective_assets.start_up_cost AS cost,
+        FROM var_start_up AS var
+        LEFT JOIN t_objective_assets
+            ON var.asset = t_objective_assets.asset
+            AND var.year = t_objective_assets.milestone_year
+        WHERE t_objective_assets.start_up_cost IS NOT NULL
+        ORDER BY var.id
+        ",
+    )
+
+    start_up_cost = @expression(
+        model,
+        sum(
+            row.cost * start_up for (row, start_up) in zip(indices, variables[:start_up].container)
+        )
+    )
+
+    indices = DuckDB.query(
+        connection,
+        "SELECT
+            var.id,
+            t_objective_assets.shut_down_cost AS cost,
+        FROM var_shut_down AS var
+        LEFT JOIN t_objective_assets
+            ON var.asset = t_objective_assets.asset
+            AND var.year = t_objective_assets.milestone_year
+        WHERE t_objective_assets.shut_down_cost IS NOT NULL
+        ORDER BY var.id
+        ",
+    )
+
+    shut_down_cost = @expression(
+        model,
+        sum(
+            row.cost * shut_down for
+            (row, shut_down) in zip(indices, variables[:shut_down].container)
+        )
+    )
+
     ## Objective function
     @objective(
         model,
@@ -303,7 +346,9 @@ function add_objective!(connection, model, variables, expressions, model_paramet
         flows_investment_cost +
         flows_fixed_cost +
         flows_variable_cost +
-        units_on_cost
+        units_on_cost +
+        start_up_cost +
+        shut_down_cost
     )
 end
 
@@ -401,6 +446,8 @@ function _create_objective_auxiliary_table(connection, constants)
             asset_commission.investment_cost_storage_energy,
             asset.capacity_storage_energy,
             asset_milestone.units_on_cost,
+            asset.start_up_cost,
+            asset.shut_down_cost,
             -- computed
             asset.discount_rate / (
                 (1 + asset.discount_rate) *

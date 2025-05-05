@@ -185,6 +185,24 @@
       "default": null,
       "description": "Whether to use an extra binary variable for the storage assets to avoid charging and discharging simultaneously (null/empty/missing -> no binary).",
       "type": "VARCHAR"
+    },
+    "start_up_cost": {
+      "constraints": {
+        "minimum": 0
+      },
+      "default": 0,
+      "description": "Cost of starting up a unit.",
+      "type": "DOUBLE",
+      "unit_of_measure": "CUR"
+    },
+    "shut_down_cost": {
+      "constraints": {
+        "minimum": 0
+      },
+      "default": 0,
+      "description": "Cost of shutting down a unit.",
+      "type": "DOUBLE",
+      "unit_of_measure": "CUR"
     }
   },
   "asset_both": {
