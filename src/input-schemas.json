@@ -167,7 +167,8 @@
       "constraints": {
         "oneOf": [
           null,
-          "basic"
+          "basic",
+          "susd_ramping_basic"
         ]
       },
       "default": null,

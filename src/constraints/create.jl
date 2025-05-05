@@ -32,6 +32,7 @@ function compute_constraints_indices(connection)
             :su_sd_eq_units_on_diff,
             :start_up_upper_bound,
             :shut_down_upper_bound,
+            :su_ramping_simple,
         )
     )
 

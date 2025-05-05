@@ -244,7 +244,7 @@ from
 where
     asset.type in ('producer', 'conversion')
     and asset.unit_commitment
-    and asset.unit_commitment_method = 'basic'
+    and (asset.unit_commitment_method = 'basic' or asset.unit_commitment_method = 'susd_ramping_basic')
 ;
 
 drop sequence id
@@ -264,7 +264,27 @@ where
     asset.type in ('producer', 'conversion')
     and asset.ramping
     and asset.unit_commitment
-    and asset.unit_commitment_method = 'basic'
+    and (asset.unit_commitment_method = 'basic' or asset.unit_commitment_method = 'susd_ramping_basic')
+;
+
+drop sequence id
+;
+
+create sequence id start 1
+;
+
+create table cons_su_ramping_simple as
+select
+    nextval('id') as id,
+    t_high.*
+from
+    t_highest_assets_and_out_flows as t_high
+    left join asset on t_high.asset = asset.asset
+where
+    asset.type in ('producer', 'conversion')
+    and asset.ramping
+    and asset.unit_commitment
+    and (asset.unit_commitment_method = 'susd_ramping_basic')
 ;
 
 drop sequence id
@@ -284,7 +304,7 @@ where
     asset.type in ('producer', 'storage', 'conversion')
     and asset.ramping
     and not asset.unit_commitment
-    and asset.unit_commitment_method != 'basic'
+    and asset.unit_commitment_method != 'basic' and asset.unit_commitment_method != 'susd_ramping_basic'
 ;
 
 create table cons_balance_storage_rep_period as
@@ -432,7 +452,7 @@ from
 where
     asset.type in ('producer', 'conversion')
     and asset.unit_commitment = true
-    and asset.unit_commitment_method = 'basic'
+    and (asset.unit_commitment_method = 'basic' or asset.unit_commitment_method = 'susd_ramping_basic')
 order by
     t_high.asset,
     t_high.year,
@@ -471,7 +491,7 @@ from
 where
     asset.type in ('producer', 'conversion')
     and asset.unit_commitment = true
-    and asset.unit_commitment_method = 'basic'
+    and (asset.unit_commitment_method = 'basic' or asset.unit_commitment_method = 'susd_ramping_basic')
 order by
     t_high.asset,
     t_high.year,
@@ -507,7 +527,7 @@ with sorted as (
     where
         asset.type in ('producer', 'conversion')
         and asset.unit_commitment = true
-        and asset.unit_commitment_method = 'basic'
+        and (asset.unit_commitment_method = 'basic' or asset.unit_commitment_method = 'susd_ramping_basic')
     order by
         t_high.asset,
         t_high.year,
