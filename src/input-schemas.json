@@ -168,7 +168,8 @@
         "oneOf": [
           null,
           "basic",
-          "susd_ramping_basic"
+          "susd_ramping_basic",
+          "susd_ramping_tight"
         ]
       },
       "default": null,

@@ -70,6 +70,22 @@ end
     @test energy_problem.objective_value ≈ 295084.75053230603 atol = 1e-5
 end
 
+@testset "UC Startup/Shutdown Tight case study" begin
+    dir = joinpath(INPUT_FOLDER, "SU-SD-ramping-tight")
+    optimizer = HiGHS.Optimizer
+    optimizer_parameters =
+        Dict("output_flag" => false, "mip_rel_gap" => 0.0, "mip_feasibility_tolerance" => 1e-5)
+    connection = DBInterface.connect(DuckDB.DB)
+    _read_csv_folder(connection, dir)
+    energy_problem = TulipaEnergyModel.run_scenario(
+        connection;
+        optimizer,
+        optimizer_parameters,
+        show_log = false,
+    )
+    @test energy_problem.objective_value ≈ 295084.7505323042 atol = 1e-5
+end
+
 @testset "Tiny Variable Resolution Case Study" begin
     dir = joinpath(INPUT_FOLDER, "Variable Resolution")
     connection = DBInterface.connect(DuckDB.DB)
