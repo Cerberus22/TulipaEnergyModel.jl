@@ -293,6 +293,26 @@ drop sequence id
 create sequence id start 1
 ;
 
+create table cons_sd_ramping_simple as
+select
+    nextval('id') as id,
+    t_high.*
+from
+    t_highest_assets_and_out_flows as t_high
+    left join asset on t_high.asset = asset.asset
+where
+    asset.type in ('producer', 'conversion')
+    and asset.ramping
+    and asset.unit_commitment
+    and (asset.unit_commitment_method = 'susd_ramping_basic')
+;
+
+drop sequence id
+;
+
+create sequence id start 1
+;
+
 create table cons_max_ramp_without_unit_commitment as
 select
     nextval('id') as id,

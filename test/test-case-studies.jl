@@ -55,7 +55,7 @@ end
 end
 
 @testset "UC Startup Ramping Case Study" begin
-    dir = joinpath(INPUT_FOLDER, "SU-ramping")
+    dir = joinpath(INPUT_FOLDER, "SU-SD-ramping")
     optimizer = HiGHS.Optimizer
     optimizer_parameters =
         Dict("output_flag" => false, "mip_rel_gap" => 0.0, "mip_feasibility_tolerance" => 1e-5)
