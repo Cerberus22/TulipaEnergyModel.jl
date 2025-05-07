@@ -167,7 +167,8 @@
       "constraints": {
         "oneOf": [
           null,
-          "basic"
+          "basic",
+          "su_sd_ramp_with_vars"
         ]
       },
       "default": null,
