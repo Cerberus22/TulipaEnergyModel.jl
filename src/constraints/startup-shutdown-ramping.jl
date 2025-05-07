@@ -189,7 +189,7 @@ function add_su_sd_ramping_constraints_tight!(
                             (min_outgoing_flow_duration - 1)
                         ) * units_on[row.id] +
                         (
-                            row.capacity -
+                            profile_times_capacity[table_name][row.id] -
                             row.max_su_ramp * profile_times_capacity[table_name][row.id] -
                             row.max_ramp_up *
                             profile_times_capacity[table_name][row.id] *
@@ -225,7 +225,7 @@ function add_su_sd_ramping_constraints_tight!(
                             (min_outgoing_flow_duration - 1)
                         ) * units_on[row.id-1] +
                         (
-                            row.capacity -
+                            profile_times_capacity[table_name][row.id-1] -
                             row.max_sd_ramp * profile_times_capacity[table_name][row.id-1] -
                             row.max_ramp_down *
                             profile_times_capacity[table_name][row.id-1] *
