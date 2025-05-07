@@ -148,7 +148,7 @@ function add_su_sd_ramping_constraints_tight!(
     # Warn: runs SQL query. Guarded by `if` statement above
     indices_dict = Dict(
         table_name => _append_su_ramping_data_to_indices(connection, table_name) for
-        table_name in (:su_ramping_tight,) # TODO: add tight 12b
+        table_name in (:su_ramping_tight, :sd_ramping_tight)
     )
 
     # Compute ` P^{availability profile} * P^{capacity}`
@@ -164,7 +164,7 @@ function add_su_sd_ramping_constraints_tight!(
                     1.0,
                 ) * row.capacity for row in indices
             ]
-        end for table_name in (:su_ramping_tight,) # TODO: add tight 12b
+        end for table_name in (:su_ramping_tight, :sd_ramping_tight)
     )
 
     # Start-Up ramping constraint --> (12a)
@@ -196,6 +196,42 @@ function add_su_sd_ramping_constraints_tight!(
                             (min_outgoing_flow_duration - 1)
                         ) * units_on[row.id-1],
                         base_name = "su_ramping_tight[$(row.asset),$(row.year),$(row.rep_period),$(row.time_block_start):$(row.time_block_end)]"
+                    )
+                end for (row, min_outgoing_flow_duration) in
+                zip(indices, cons.coefficients[:min_outgoing_flow_duration])
+            ],
+        )
+    end
+
+    # Shut-Down ramping constraint --> (12b)
+    let table_name = :sd_ramping_tight, cons = constraints[table_name]
+        indices = indices_dict[table_name]
+        units_on = cons.expressions[:units_on]
+        attach_constraint!(
+            model,
+            cons,
+            table_name,
+            [
+                if row.time_block_start == 1
+                    @constraint(model, 0 == 0) # Placeholder for case k = 1
+                else
+                    @constraint(
+                        model,
+                        cons.expressions[:outgoing][row.id-1] ≤
+                        (
+                            row.max_sd_ramp * profile_times_capacity[table_name][row.id-1] +
+                            row.max_ramp_down *
+                            profile_times_capacity[table_name][row.id-1] *
+                            (min_outgoing_flow_duration - 1)
+                        ) * units_on[row.id-1] +
+                        (
+                            row.capacity -
+                            row.max_sd_ramp * profile_times_capacity[table_name][row.id-1] -
+                            row.max_ramp_down *
+                            profile_times_capacity[table_name][row.id-1] *
+                            (min_outgoing_flow_duration - 1)
+                        ) * units_on[row.id],
+                        base_name = "sd_ramping_tight[$(row.asset),$(row.year),$(row.rep_period),$(row.time_block_start):$(row.time_block_end)]"
                     )
                 end for (row, min_outgoing_flow_duration) in
                 zip(indices, cons.coefficients[:min_outgoing_flow_duration])

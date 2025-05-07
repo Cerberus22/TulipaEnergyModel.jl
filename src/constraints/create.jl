@@ -35,6 +35,7 @@ function compute_constraints_indices(connection)
             :su_ramping_simple,
             :sd_ramping_simple,
             :su_ramping_tight,
+            :sd_ramping_tight,
         )
     )
 
