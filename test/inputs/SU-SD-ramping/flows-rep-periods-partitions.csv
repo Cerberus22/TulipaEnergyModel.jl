@@ -1,0 +1,5 @@
+from_asset,to_asset,year,rep_period,specification,partition
+gas,ccgt,2030,1,uniform,2
+gas,ccgt,2030,2,uniform,2
+ccgt,demand,2030,1,uniform,2
+ccgt,demand,2030,2,uniform,2

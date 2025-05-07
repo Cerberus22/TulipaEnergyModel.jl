@@ -111,6 +111,24 @@
       "type": "DOUBLE",
       "unit_of_measure": "p.u./h"
     },
+    "max_sd_ramp": {
+      "constraints": {
+        "minimum": 0
+      },
+      "default": 0,
+      "description": "Maximum ramping down rate when shutting the asset down.",
+      "type": "DOUBLE",
+      "unit_of_measure": "p.u./h"
+    },
+    "max_su_ramp": {
+      "constraints": {
+        "minimum": 0
+      },
+      "default": 0,
+      "description": "Maximum ramping up rate when starting the asset up.",
+      "type": "DOUBLE",
+      "unit_of_measure": "p.u./h"
+    },
     "min_operating_point": {
       "constraints": {
         "maximum": 1,
@@ -167,7 +185,8 @@
       "constraints": {
         "oneOf": [
           null,
-          "basic"
+          "basic",
+          "su_sd_ramp_with_vars"
         ]
       },
       "default": null,

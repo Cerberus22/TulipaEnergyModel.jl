@@ -54,6 +54,22 @@ end
     @test energy_problem.objective_value ≈ 293074.923309 atol = 1e-5
 end
 
+@testset "UC Startup Ramping Case Study" begin
+    dir = joinpath(INPUT_FOLDER, "SU-SD-ramping")
+    optimizer = HiGHS.Optimizer
+    optimizer_parameters =
+        Dict("output_flag" => false, "mip_rel_gap" => 0.0, "mip_feasibility_tolerance" => 1e-5)
+    connection = DBInterface.connect(DuckDB.DB)
+    _read_csv_folder(connection, dir)
+    energy_problem = TulipaEnergyModel.run_scenario(
+        connection;
+        optimizer,
+        optimizer_parameters,
+        show_log = false,
+    )
+    @test energy_problem.objective_value ≈ 375583.9149893305 atol = 1e-5
+end
+
 @testset "Tiny Variable Resolution Case Study" begin
     dir = joinpath(INPUT_FOLDER, "Variable Resolution")
     connection = DBInterface.connect(DuckDB.DB)
