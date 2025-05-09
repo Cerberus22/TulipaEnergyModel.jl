@@ -425,7 +425,8 @@ from
     t_highest_assets_and_out_flows as t_high
         on
             atr.asset = t_high.asset and
-            atr.time_block_start = t_high.time_block_start
+            atr.time_block_start = t_high.time_block_start and
+            atr.rep_period = t_high.rep_period
     join asset
         on
             asset.asset = t_high.asset
@@ -464,7 +465,8 @@ from
     t_highest_assets_and_out_flows as t_high
         on
             atr.asset = t_high.asset and
-            atr.time_block_start = t_high.time_block_start
+            atr.time_block_start = t_high.time_block_start and
+            atr.rep_period = t_high.rep_period
     join asset
         on
             asset.asset = t_high.asset
@@ -501,7 +503,8 @@ with sorted as (
         asset_time_resolution_rep_period as atr
         join t_highest_assets_and_out_flows as t_high
             on atr.asset = t_high.asset
-            and atr.time_block_start = t_high.time_block_start
+            and atr.time_block_start = t_high.time_block_start and
+            atr.rep_period = t_high.rep_period
         join asset
             on asset.asset = t_high.asset
     where
@@ -568,7 +571,8 @@ with sorted as (
         asset_time_resolution_rep_period as atr
         join t_highest_assets_and_out_flows as t_high
             on atr.asset = t_high.asset
-            and atr.time_block_start = t_high.time_block_start
+            and atr.time_block_start = t_high.time_block_start and
+            atr.rep_period = t_high.rep_period
         join asset
             on asset.asset = t_high.asset
     where
@@ -634,7 +638,8 @@ with sorted as (
         asset_time_resolution_rep_period as atr
         join t_highest_assets_and_out_flows as t_high
             on atr.asset = t_high.asset
-            and atr.time_block_start = t_high.time_block_start
+            and atr.time_block_start = t_high.time_block_start and
+            atr.rep_period = t_high.rep_period
         join asset
             on asset.asset = t_high.asset
     where
