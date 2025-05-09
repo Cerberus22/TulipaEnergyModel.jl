@@ -33,7 +33,7 @@ function compute_constraints_indices(connection)
             :start_up_upper_bound,
             :shut_down_upper_bound,
             :start_up_trajectory_lower_bound,
-            # :start_up_trajectory_upper_bound,
+            :start_up_trajectory_upper_bound,
         )
     )
 

@@ -1,4 +1,5 @@
 export add_start_up_trajectory_lower_bound_constarints!
+export add_start_up_trajectory_upper_bound_constraints!
 
 """
     add_start_up_trajectory_lower_bound_constraints!(model, constraints)
@@ -14,7 +15,103 @@ function add_start_up_trajectory_lower_bound_constraints!(
     profiles,
 )
     let table_name = :start_up_trajectory_lower_bound, cons = constraints[table_name]
-        indices = _append_data_to_start_up_trajectory(connection, :start_up_trajectory_lower_bound)
+        indices = _append_data_to_start_up_trajectory(connection, table_name)
+
+        # Expression for maximum available units per year
+        expr_avail_simple_method =
+            expressions[:available_asset_units_simple_method].expressions[:assets]
+
+        # Expression for Profile * Capacity -> pmax
+        attach_expression!(
+            cons,
+            :profile_times_min_op_times_units_on,
+            [
+                @expression(
+                    model,
+                    row.min_operating_point *
+                    _profile_aggregate(
+                        profiles.rep_period,
+                        (row.profile_name, row.year, row.rep_period),
+                        row.time_block_start:row.time_block_end,
+                        Statistics.mean,
+                        1.0,
+                    ) *
+                    cons.expressions[:units_on][row.id]
+                ) for row in indices
+            ],
+        )
+
+        # Start up trajectory lower bound
+        flow_total = cons.expressions[:outgoing]
+        pmin_sum = cons.expressions[:profile_times_min_op_times_units_on]
+        start_up_zeroes = cons.expressions[:start_up]
+        start_up = []
+
+        # Replace every zero in the start_up with the first non-zero after it
+        for (i, su) in enumerate(start_up_zeroes)
+            if (su == 0)
+                while (su == 0 && i != length(start_up_zeroes))
+                    i += 1
+                    su = start_up_zeroes[i]
+                end
+            end
+            push!(start_up, su)
+        end
+
+        attach_constraint!(
+            model,
+            cons,
+            table_name,
+            [
+                if (row.next_SU_start === missing)
+                    @constraint(model, 0 == 0)
+                else
+                    let traj = read_trajectory(row.trajectory),
+                        T_su = length(traj),
+                        t_start = row.time_block_start,
+                        t_end = row.time_block_end,
+
+                        # Should be the start_up time of the next time block
+                        start_up_start = row.next_SU_start,
+
+                        sum = sum(
+                            collect([
+                                if (t_start + i <= start_up_start && start_up_start <= t_end + i)
+                                    traj[T_su-i+1]
+                                else
+                                    0
+                                end for i in collect(1:T_su)
+                            ]),
+                        )
+
+                        @constraint(
+                            model,
+                            flow_total[row.id] >= pmin_sum[row.id] + start_up[row.id+1] * sum,
+                            base_name = "$table_name[$(row.asset),$(row.year),$(row.rep_period),$(row.time_block_start):$(row.time_block_end)]"
+                        )
+                    end
+                end for row in indices
+            ],
+        )
+    end
+    return nothing
+end
+
+"""
+    add_start_up_trajectory_upper_bound_constraints!(model, constraints)
+
+Adds the start up trajectory upper bound constraints to the model.
+"""
+function add_start_up_trajectory_upper_bound_constraints!(
+    connection,
+    model,
+    variables,
+    expressions,
+    constraints,
+    profiles,
+)
+    let table_name = :start_up_trajectory_upper_bound, cons = constraints[table_name]
+        indices = _append_data_to_start_up_trajectory(connection, table_name)
 
         # Expression for maximum available units per year
         expr_avail_simple_method =
@@ -40,10 +137,9 @@ function add_start_up_trajectory_lower_bound_constraints!(
             ],
         )
 
-        # Start up trajectory lower bound
+        # Start up trajectory upper bound
         flow_total = cons.expressions[:outgoing]
         pmax_sum = cons.expressions[:profile_times_capacity_times_units_on]
-        units_on = cons.expressions[:units_on]
         start_up_zeroes = cons.expressions[:start_up]
         start_up = []
 

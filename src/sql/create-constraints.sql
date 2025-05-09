@@ -244,8 +244,7 @@ from
 where
     asset.type in ('producer', 'conversion')
     and asset.unit_commitment
-    and (asset.unit_commitment_method = 'basic'
-    or asset.unit_commitment_method = 'trajectory')
+    and asset.unit_commitment_method = 'basic'
 ;
 
 drop sequence id
@@ -572,14 +571,9 @@ with sorted as (
         t_high.rep_period,
         t_high.time_block_start,
         t_high.time_block_end,
+        asset.min_operating_point,
     from
         t_highest_assets_and_out_flows as t_high
-        -- join asset_time_resolution_rep_period as atr
-        --     on
-        --         t_high.asset = atr.asset
-        --         and t_high.time_block_start >= atr.time_block_start
-        --         and t_high.time_block_end <= atr.time_block_end -- This should correctly line up the resolutions
-        --         and t_high.rep_period = atr.rep_period
         join asset
             on
                 t_high.asset = asset.asset
@@ -600,6 +594,9 @@ select
 from
     sorted
 ;
+
+create table cons_start_up_trajectory_upper_bound as
+select * from cons_start_up_trajectory_lower_bound;
 
 drop sequence id
 ;

@@ -1,4 +1,3 @@
 asset,year,rep_period,specification,partition
-geo,2030,1,uniform,1
-geo,2030,2,uniform,2
-geo,2030,3,uniform,3
+ccgt,2030,1,uniform,3
+smr,2030,1,uniform,6
