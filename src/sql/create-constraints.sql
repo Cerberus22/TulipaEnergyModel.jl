@@ -244,7 +244,8 @@ from
 where
     asset.type in ('producer', 'conversion')
     and asset.unit_commitment
-    and asset.unit_commitment_method = 'basic'
+    and (asset.unit_commitment_method = 'basic'
+    or asset.unit_commitment_method = 'trajectory')
 ;
 
 drop sequence id
@@ -264,7 +265,8 @@ where
     asset.type in ('producer', 'conversion')
     and asset.ramping
     and asset.unit_commitment
-    and asset.unit_commitment_method = 'basic'
+    and (asset.unit_commitment_method = 'basic'
+    or asset.unit_commitment_method = 'trajectory')
 ;
 
 drop sequence id
@@ -424,15 +426,17 @@ from
     join
     t_highest_assets_and_out_flows as t_high
         on
-            atr.asset = t_high.asset and
-            atr.time_block_start = t_high.time_block_start
+            atr.asset = t_high.asset
+            and atr.time_block_start = t_high.time_block_start
+            and atr.rep_period = t_high.rep_period
     join asset
         on
             asset.asset = t_high.asset
 where
     asset.type in ('producer', 'conversion')
     and asset.unit_commitment = true
-    and asset.unit_commitment_method = 'basic'
+    and (asset.unit_commitment_method = 'basic'
+    or asset.unit_commitment_method = 'trajectory')
 order by
     t_high.asset,
     t_high.year,
@@ -463,15 +467,17 @@ from
     join
     t_highest_assets_and_out_flows as t_high
         on
-            atr.asset = t_high.asset and
-            atr.time_block_start = t_high.time_block_start
+            atr.asset = t_high.asset
+            and atr.time_block_start = t_high.time_block_start
+            and atr.rep_period = t_high.rep_period
     join asset
         on
             asset.asset = t_high.asset
 where
     asset.type in ('producer', 'conversion')
     and asset.unit_commitment = true
-    and asset.unit_commitment_method = 'basic'
+    and (asset.unit_commitment_method = 'basic'
+    or asset.unit_commitment_method = 'trajectory')
 order by
     t_high.asset,
     t_high.year,
@@ -502,12 +508,14 @@ with sorted as (
         join t_highest_assets_and_out_flows as t_high
             on atr.asset = t_high.asset
             and atr.time_block_start = t_high.time_block_start
+            and t_high.rep_period = atr.rep_period
         join asset
             on asset.asset = t_high.asset
     where
         asset.type in ('producer', 'conversion')
         and asset.unit_commitment = true
-        and asset.unit_commitment_method = 'basic'
+        and (asset.unit_commitment_method = 'basic'
+        or asset.unit_commitment_method = 'trajectory')
     order by
         t_high.asset,
         t_high.year,
@@ -549,6 +557,49 @@ from
     sub
 ;
 
+
+drop sequence id
+;
+
+create sequence id start 1
+;
+
+create table cons_start_up_trajectory_lower_bound as
+with sorted as (
+    select
+        t_high.asset,
+        t_high.year,
+        t_high.rep_period,
+        t_high.time_block_start,
+        t_high.time_block_end,
+    from
+        t_highest_assets_and_out_flows as t_high
+        -- join asset_time_resolution_rep_period as atr
+        --     on
+        --         t_high.asset = atr.asset
+        --         and t_high.time_block_start >= atr.time_block_start
+        --         and t_high.time_block_end <= atr.time_block_end -- This should correctly line up the resolutions
+        --         and t_high.rep_period = atr.rep_period
+        join asset
+            on
+                t_high.asset = asset.asset
+    where
+        asset.type in ('producer', 'conversion')
+        and asset.unit_commitment
+        and (asset.unit_commitment_method = 'trajectory')
+    order by
+        t_high.asset,
+        t_high.year,
+        t_high.rep_period,
+        t_high.time_block_start,
+        t_high.time_block_end
+)
+select
+    nextval('id') as id,
+    sorted.*
+from
+    sorted
+;
 
 drop sequence id
 ;

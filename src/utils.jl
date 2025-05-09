@@ -94,3 +94,7 @@ function _create_group_table_if_not_exist!(
 
     return
 end
+
+function read_trajectory(trajectory::String)
+    return parse.(Int, split(trajectory, ","))
+end

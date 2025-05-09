@@ -140,6 +140,11 @@
       "type": "INTEGER",
       "unit_of_measure": "years"
     },
+    "trajectory": {
+      "default": null,
+      "description": "Trajectory of the asset",
+      "type": "VARCHAR"
+    },
     "type": {
       "constraints": {
         "oneOf": [
@@ -167,7 +172,8 @@
       "constraints": {
         "oneOf": [
           null,
-          "basic"
+          "basic",
+          "trajectory"
         ]
       },
       "default": null,

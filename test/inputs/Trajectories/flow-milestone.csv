@@ -1,0 +1,2 @@
+from_asset,to_asset,milestone_year,investable,variable_cost,reactance,dc_opf
+geo,demand,2030,false,0.2,0.3,false
