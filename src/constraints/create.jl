@@ -33,6 +33,7 @@ function compute_constraints_indices(connection)
             :start_up_upper_bound,
             :shut_down_upper_bound,
             :su_ramp_vars_flow_diff,
+            :sd_ramp_vars_flow_diff,
         )
     )
 

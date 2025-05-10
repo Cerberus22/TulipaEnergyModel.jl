@@ -54,7 +54,7 @@ end
     @test energy_problem.objective_value ≈ 293074.923309 atol = 1e-5
 end
 
-@testset "UC Startup Ramping Case Study" begin
+@testset "UC Startup Shutdown Ramping Case Study" begin
     dir = joinpath(INPUT_FOLDER, "SU-SD-ramping")
     optimizer = HiGHS.Optimizer
     optimizer_parameters =
@@ -67,7 +67,7 @@ end
         optimizer_parameters,
         show_log = false,
     )
-    @test energy_problem.objective_value ≈ 375583.9149893305 atol = 1e-5
+    @test energy_problem.objective_value ≈ 405146.5964736383 atol = 1e-5
 end
 
 @testset "Tiny Variable Resolution Case Study" begin
