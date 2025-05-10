@@ -15,8 +15,12 @@ function add_su_sd_ramping_with_vars_constraints!(
 )
     indices_dict = Dict(
         table_name => _append_su_sd_ramp_vars_data_to_indices(connection, table_name) for
-        table_name in
-        (:su_ramp_vars_flow_diff, :sd_ramp_vars_flow_diff, :su_ramp_vars_flow_upper_bound)
+        table_name in (
+            :su_ramp_vars_flow_diff,
+            :sd_ramp_vars_flow_diff,
+            :su_ramp_vars_flow_upper_bound,
+            :sd_ramp_vars_flow_upper_bound,
+        )
     )
 
     # expression for p^{availability profile} * p^{capacity}
@@ -33,8 +37,12 @@ function add_su_sd_ramping_with_vars_constraints!(
                     1.0,
                 ) * row.capacity for row in indices
             ]
-        end for table_name in
-        (:su_ramp_vars_flow_diff, :sd_ramp_vars_flow_diff, :su_ramp_vars_flow_upper_bound)
+        end for table_name in (
+            :su_ramp_vars_flow_diff,
+            :sd_ramp_vars_flow_diff,
+            :su_ramp_vars_flow_upper_bound,
+            :sd_ramp_vars_flow_upper_bound,
+        )
     )
 
     # constraint 13a - start-up ramping flow difference
@@ -139,6 +147,50 @@ function add_su_sd_ramping_with_vars_constraints!(
                             p_shut_down_ramp - p_ramp_down * (duration[row.id-1] - 1),
                             0,
                         ) * shut_down[row.id],
+                        base_name = "$table_name[$(row.asset),$(row.year),$(row.rep_period),$(row.time_block_start):$(row.time_block_end)]"
+                    )
+                end for row in indices_dict[table_name]
+            ],
+        )
+    end
+
+    # constraint 13d - shut-down ramping flow upper bound
+    let table_name = :sd_ramp_vars_flow_upper_bound, cons = constraints[table_name]
+        units_on = cons.expressions[:units_on]
+        start_up = cons.expressions[:start_up]
+        shut_down = cons.expressions[:shut_down]
+        flow_total = cons.expressions[:outgoing]
+        duration = cons.coefficients[:min_outgoing_flow_duration]
+
+        attach_constraint!(
+            model,
+            cons,
+            table_name,
+            [
+                if row.time_block_start == 1
+                    @constraint(model, 0 == 0)
+                else
+                    p_start_up_ramp =
+                        row.max_su_ramp * profile_times_capacity[table_name][row.id-1]
+                    p_shut_down_ramp =
+                        row.max_sd_ramp * profile_times_capacity[table_name][row.id-1]
+
+                    p_ramp_up = row.max_ramp_up * profile_times_capacity[table_name][row.id-1]
+                    p_ramp_down = row.max_ramp_down * profile_times_capacity[table_name][row.id-1]
+
+                    p_max = profile_times_capacity[table_name][row.id-1]
+
+                    @constraint(
+                        model,
+                        flow_total[row.id-1] <=
+                        p_max * units_on[row.id-1] -
+                        (p_max - p_shut_down_ramp - p_ramp_down * (duration[row.id-1] - 1)) *
+                        shut_down[row.id] -
+                        max(
+                            p_shut_down_ramp + p_ramp_down * (duration[row.id-1] - 1) -
+                            p_start_up_ramp - p_ramp_up * (duration[row.id-1] - 1),
+                            0,
+                        ) * start_up[row.id-1],
                         base_name = "$table_name[$(row.asset),$(row.year),$(row.rep_period),$(row.time_block_start):$(row.time_block_end)]"
                     )
                 end for row in indices_dict[table_name]

@@ -561,6 +561,7 @@ function add_expressions_to_constraints!(connection, variables, constraints)
         :su_ramp_vars_flow_diff,
         :sd_ramp_vars_flow_diff,
         :su_ramp_vars_flow_upper_bound,
+        :sd_ramp_vars_flow_upper_bound,
     )
         @timeit to "add_expression_terms_rep_period_constraints!" add_expression_terms_rep_period_constraints!(
             connection,
@@ -599,6 +600,7 @@ function add_expressions_to_constraints!(connection, variables, constraints)
         :su_ramp_vars_flow_diff,
         :sd_ramp_vars_flow_diff,
         :su_ramp_vars_flow_upper_bound,
+        :sd_ramp_vars_flow_upper_bound,
     )
         @timeit to "attach units_on expression to $table_name" attach_expression_on_constraints_grouping_variables!(
             connection,
