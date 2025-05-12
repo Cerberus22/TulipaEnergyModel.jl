@@ -57,7 +57,7 @@ function add_su_sd_ramping_with_vars_constraints!(
             cons,
             table_name,
             [
-                if row.time_block_start == 1
+                if row.time_block_start == 1 || flow_total[row.id] == flow_total[row.id-1]
                     @constraint(model, 0 == 0)
                 else
                     p_start_up_ramp = row.max_su_ramp * profile_times_capacity[table_name][row.id]
@@ -89,7 +89,7 @@ function add_su_sd_ramping_with_vars_constraints!(
             cons,
             table_name,
             [
-                if row.time_block_start == 1
+                if row.time_block_start == 1 || flow_total[row.id] == flow_total[row.id-1]
                     @constraint(model, 0 == 0)
                 else
                     p_shut_down_ramp =
@@ -123,7 +123,7 @@ function add_su_sd_ramping_with_vars_constraints!(
             cons,
             table_name,
             [
-                if row.time_block_start == 1
+                if row.time_block_start == 1 || row.minimum_up_time != 1
                     @constraint(model, 0 == 0)
                 else
                     p_start_up_ramp =
@@ -167,7 +167,7 @@ function add_su_sd_ramping_with_vars_constraints!(
             cons,
             table_name,
             [
-                if row.time_block_start == 1
+                if row.time_block_start == 1 || row.minimum_up_time != 1
                     @constraint(model, 0 == 0)
                 else
                     p_start_up_ramp =
@@ -210,6 +210,7 @@ function _append_su_sd_ramp_vars_data_to_indices(connection, table_name)
             ast_t.max_ramp_down,
             ast_t.max_su_ramp,
             ast_t.max_sd_ramp,
+            ast_t.minimum_up_time,
             assets_profiles.profile_name,
         FROM cons_$table_name AS cons
         LEFT JOIN asset as ast_t

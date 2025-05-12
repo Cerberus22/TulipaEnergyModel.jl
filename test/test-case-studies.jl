@@ -67,7 +67,7 @@ end
         optimizer_parameters,
         show_log = false,
     )
-    @test energy_problem.objective_value ≈ 405540.7964736385 atol = 1e-5
+    @test energy_problem.objective_value ≈ 405525.7059121132 atol = 1e-5
 end
 
 @testset "Tiny Variable Resolution Case Study" begin
