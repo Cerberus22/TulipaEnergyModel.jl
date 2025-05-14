@@ -581,7 +581,7 @@ from
 where
     asset.type in ('producer', 'conversion')
     and asset.unit_commitment = true
-    and asset.unit_commitment_method in ('min_up_down', 'trajectory')
+    and asset.unit_commitment_method = 'min_up_down'
 order by
     t_high.asset,
     t_high.year,
