@@ -202,6 +202,21 @@ function create_model(
         constraints,
     )
 
+    @timeit to "add_minimum_up_time_constraints!" add_minimum_up_time_constraints!(
+        connection,
+        model,
+        variables,
+        expressions,
+        constraints,
+    )
+    @timeit to "add_minimum_down_time_constraints!" add_minimum_down_time_constraints!(
+        connection,
+        model,
+        variables,
+        expressions,
+        constraints,
+    )
+
     @timeit to "add_start_up_trajectory_lower_bound_constraints!" add_start_up_trajectory_lower_bound_constraints!(
         connection,
         model,

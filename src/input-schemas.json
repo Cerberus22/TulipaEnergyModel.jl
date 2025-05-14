@@ -173,7 +173,8 @@
         "oneOf": [
           null,
           "basic",
-          "trajectory"
+          "trajectory",
+          "min_up_down"
         ]
       },
       "default": null,
