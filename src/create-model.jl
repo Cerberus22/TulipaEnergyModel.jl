@@ -217,16 +217,7 @@ function create_model(
         constraints,
     )
 
-    @timeit to "add_start_up_trajectory_lower_bound_constraints!" add_start_up_trajectory_lower_bound_constraints!(
-        connection,
-        model,
-        variables,
-        expressions,
-        constraints,
-        profiles,
-    )
-
-    @timeit to "add_start_up_trajectory_upper_bound_constraints!" add_start_up_trajectory_upper_bound_constraints!(
+    @timeit to "add_trajectory_constraints!" add_trajectory_constraints!(
         connection,
         model,
         variables,

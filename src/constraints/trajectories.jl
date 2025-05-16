@@ -5,8 +5,9 @@ export add_start_up_trajectory_upper_bound_constraints!
     add_start_up_trajectory_lower_bound_constraints!(model, constraints)
 
 Adds the start up trajectory lower bound constraints to the model.
+Assets using this constraint should have a minimum down time >= length of start up trajectory + length of shut down trajectory
 """
-function add_start_up_trajectory_lower_bound_constraints!(
+function add_trajectory_constraints!(
     connection,
     model,
     variables,
@@ -14,21 +15,23 @@ function add_start_up_trajectory_lower_bound_constraints!(
     constraints,
     profiles,
 )
-    let table_name = :start_up_trajectory_lower_bound, cons = constraints[table_name]
-        indices = _append_data_to_start_up_trajectory(connection, table_name)
+    let table_name = :trajectory, cons = constraints[table_name]
+        # Prevent error if column doesnt exist
+        if length(collect(cons.indices)) == 0
+            return
+        end
 
-        # Expression for maximum available units per year
-        expr_avail_simple_method =
-            expressions[:available_asset_units_simple_method].expressions[:assets]
+        indices = _append_data_to_trajectory(connection, table_name)
 
-        # Expression for Profile * Capacity -> pmax
+        # Expression for Profile * Capacity -> pmin
         attach_expression!(
             cons,
-            :profile_times_min_op_times_units_on,
+            :min_production,
             [
                 @expression(
                     model,
                     row.min_operating_point *
+                    row.capacity *
                     _profile_aggregate(
                         profiles.rep_period,
                         (row.profile_name, row.year, row.rep_period),
@@ -41,86 +44,10 @@ function add_start_up_trajectory_lower_bound_constraints!(
             ],
         )
 
-        # Start up trajectory lower bound
-        flow_total = cons.expressions[:outgoing]
-        pmin_sum = cons.expressions[:profile_times_min_op_times_units_on]
-        start_up_zeroes = cons.expressions[:start_up]
-        start_up = []
-
-        # Replace every zero in the start_up with the first non-zero after it
-        for (i, su) in enumerate(start_up_zeroes)
-            if (su == 0)
-                while (su == 0 && i != length(start_up_zeroes))
-                    i += 1
-                    su = start_up_zeroes[i]
-                end
-            end
-            push!(start_up, su)
-        end
-
-        attach_constraint!(
-            model,
-            cons,
-            table_name,
-            [
-                if (row.next_SU_start === missing)
-                    @constraint(model, 0 == 0)
-                else
-                    let traj = read_trajectory(row.trajectory),
-                        T_su = length(traj),
-                        t_start = row.time_block_start,
-                        t_end = row.time_block_end,
-
-                        # Should be the start_up time of the next time block
-                        start_up_start = row.next_SU_start,
-
-                        sum = sum(
-                            collect([
-                                if (t_start + i <= start_up_start && start_up_start <= t_end + i)
-                                    traj[T_su-i+1]
-                                else
-                                    0
-                                end for i in collect(1:T_su)
-                            ]),
-                        )
-
-                        @constraint(
-                            model,
-                            flow_total[row.id] >= pmin_sum[row.id] + start_up[row.id+1] * sum,
-                            base_name = "$table_name[$(row.asset),$(row.year),$(row.rep_period),$(row.time_block_start):$(row.time_block_end)]"
-                        )
-                    end
-                end for row in indices
-            ],
-        )
-    end
-    return nothing
-end
-
-"""
-    add_start_up_trajectory_upper_bound_constraints!(model, constraints)
-
-Adds the start up trajectory upper bound constraints to the model.
-"""
-function add_start_up_trajectory_upper_bound_constraints!(
-    connection,
-    model,
-    variables,
-    expressions,
-    constraints,
-    profiles,
-)
-    let table_name = :start_up_trajectory_upper_bound, cons = constraints[table_name]
-        indices = _append_data_to_start_up_trajectory(connection, table_name)
-
-        # Expression for maximum available units per year
-        expr_avail_simple_method =
-            expressions[:available_asset_units_simple_method].expressions[:assets]
-
-        # Expression for Profile * Capacity -> pmax
+        # Expression for Profile * Capacity * units_on -> pmax
         attach_expression!(
             cons,
-            :profile_times_capacity_times_units_on,
+            :max_production,
             [
                 @expression(
                     model,
@@ -137,11 +64,13 @@ function add_start_up_trajectory_upper_bound_constraints!(
             ],
         )
 
-        # Start up trajectory upper bound
         flow_total = cons.expressions[:outgoing]
-        pmax_sum = cons.expressions[:profile_times_capacity_times_units_on]
+        pmin_sum = cons.expressions[:min_production]
+        pmax_sum = cons.expressions[:max_production]
         start_up_zeroes = cons.expressions[:start_up]
         start_up = []
+        shut_down_zeroes = cons.expressions[:shut_down]
+        shut_down = []
 
         # Replace every zero in the start_up with the first non-zero after it
         for (i, su) in enumerate(start_up_zeroes)
@@ -154,38 +83,133 @@ function add_start_up_trajectory_upper_bound_constraints!(
             push!(start_up, su)
         end
 
+        # Shift to align with constraint
+        for i in 1:length(start_up)-1
+            start_up[i] = start_up[i+1]
+        end
+        start_up[length(start_up)] = 0
+
+        # Replace every zero in shut_down with the first non-zero before it
+        for (i, sd) in enumerate(shut_down_zeroes)
+            if (sd == 0)
+                while (sd == 0 && i >= 1)
+                    i -= 1
+                    sd = shut_down_zeroes[i]
+                end
+            end
+            push!(shut_down, sd)
+        end
+
+        # Attach lower bound constraint
         attach_constraint!(
             model,
             cons,
-            table_name,
+            "start_up_$(table_name)_lower_bound" |> Symbol,
             [
-                if (row.next_SU_start === missing)
-                    @constraint(model, 0 == 0)
-                else
-                    let traj = read_trajectory(row.trajectory),
-                        T_su = length(traj),
-                        t_start = row.time_block_start,
-                        t_end = row.time_block_end,
+                let su_traj = read_trajectory(row.start_trajectory),
+                    t_su = length(su_traj),
+                    sd_traj = read_trajectory(row.shut_trajectory),
+                    t_sd = length(sd_traj),
+                    t_start = row.time_block_start,
+                    t_end = row.time_block_end
 
-                        # Should be the start_up time of the next time block
-                        start_up_start = row.next_SU_start,
-
-                        sum = sum(
+                    start_up_sum = 0
+                    if (!ismissing(row.next_SU_start))
+                        start_up_sum = sum(
                             collect([
-                                if (t_start + i <= start_up_start && start_up_start <= t_end + i)
-                                    traj[T_su-i+1]
+                                if (
+                                    t_start + i <= row.next_SU_start &&
+                                    row.next_SU_start <= t_end + i
+                                )
+                                    su_traj[t_su-i+1]
                                 else
                                     0
-                                end for i in collect(1:T_su)
+                                end for i in collect(1:t_su)
                             ]),
                         )
+                    end
 
-                        @constraint(
-                            model,
-                            flow_total[row.id] <= pmax_sum[row.id] + start_up[row.id+1] * sum,
-                            base_name = "$table_name[$(row.asset),$(row.year),$(row.rep_period),$(row.time_block_start):$(row.time_block_end)]"
+                    shut_down_sum = 0
+                    if (!ismissing(row.last_SD_start))
+                        shut_down_sum = sum(
+                            collect([
+                                if (
+                                    t_start - i <= row.last_SD_start &&
+                                    row.last_SD_start <= t_end - i
+                                )
+                                    sd_traj[i+1]
+                                else
+                                    0
+                                end for i in collect(0:t_su-1)
+                            ]),
                         )
                     end
+
+                    @constraint(
+                        model,
+                        flow_total[row.id] >=
+                        pmin_sum[row.id] +
+                        start_up[row.id] * start_up_sum +
+                        shut_down[row.id] * shut_down_sum,
+                        base_name = "$table_name[$(row.asset),$(row.year),$(row.rep_period),$(row.time_block_start):$(row.time_block_end)]"
+                    )
+                end for row in indices
+            ],
+        )
+
+        # Attach upper bound constraint
+        attach_constraint!(
+            model,
+            cons,
+            "start_up_$(table_name)_upper_bound" |> Symbol,
+            [
+                let su_traj = read_trajectory(row.start_trajectory),
+                    t_su = length(su_traj),
+                    sd_traj = read_trajectory(row.shut_trajectory),
+                    t_sd = length(sd_traj),
+                    t_start = row.time_block_start,
+                    t_end = row.time_block_end
+
+                    start_up_sum = 0
+                    if (!ismissing(row.next_SU_start))
+                        start_up_sum = sum(
+                            collect([
+                                if (
+                                    t_start + i <= row.next_SU_start &&
+                                    row.next_SU_start <= t_end + i
+                                )
+                                    su_traj[t_su-i+1]
+                                else
+                                    0
+                                end for i in collect(1:t_su)
+                            ]),
+                        )
+                    end
+
+                    shut_down_sum = 0
+                    if (!ismissing(row.last_SD_start))
+                        shut_down_sum = sum(
+                            collect([
+                                if (
+                                    t_start - i <= row.last_SD_start &&
+                                    row.last_SD_start <= t_end - i
+                                )
+                                    sd_traj[i+1]
+                                else
+                                    0
+                                end for i in collect(0:t_su-1)
+                            ]),
+                        )
+                    end
+
+                    @constraint(
+                        model,
+                        flow_total[row.id] <=
+                        pmax_sum[row.id] +
+                        start_up[row.id] * start_up_sum +
+                        shut_down[row.id] * shut_down_sum,
+                        base_name = "$table_name[$(row.asset),$(row.year),$(row.rep_period),$(row.time_block_start):$(row.time_block_end)]"
+                    )
                 end for row in indices
             ],
         )
@@ -193,13 +217,15 @@ function add_start_up_trajectory_upper_bound_constraints!(
     return nothing
 end
 
-function _append_data_to_start_up_trajectory(connection, table_name)
+function _append_data_to_trajectory(connection, table_name)
     return DuckDB.query(
         connection,
         "SELECT
             cons.*,
             start_up.time_block_start AS next_SU_start,
-            asset.trajectory        AS trajectory,
+            shut_down.time_block_start AS last_SD_start,
+            asset.start_trajectory        AS start_trajectory,
+            asset.shut_trajectory        AS shut_trajectory,
             asset.capacity          AS capacity,
             profiles.profile_name   AS profile_name,
             expr_avail.id           AS avail_id
@@ -223,6 +249,11 @@ function _append_data_to_start_up_trajectory(connection, table_name)
             AND cons.year = start_up.year
             AND cons.rep_period = start_up.rep_period
             AND atr.time_block_end + 1 = start_up.time_block_start
+        LEFT JOIN var_shut_down AS shut_down
+            ON cons.asset = shut_down.asset
+            AND cons.year = shut_down.year
+            AND cons.rep_period = shut_down.rep_period
+            AND atr.time_block_start = shut_down.time_block_start
         WHERE asset.investment_method in ('simple', 'none')
         ORDER BY cons.id
         ",

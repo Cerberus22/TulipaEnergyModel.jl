@@ -581,7 +581,7 @@ from
 where
     asset.type in ('producer', 'conversion')
     and asset.unit_commitment = true
-    and asset.unit_commitment_method = 'min_up_down'
+    and asset.unit_commitment_method in ('min_up_down', 'trajectory')
 order by
     t_high.asset,
     t_high.year,
@@ -679,7 +679,7 @@ drop sequence id
 create sequence id start 1
 ;
 
-create table cons_start_up_trajectory_lower_bound as
+create table cons_trajectory as
 with sorted as (
     select
         t_high.asset,
@@ -710,9 +710,6 @@ select
 from
     sorted
 ;
-
-create table cons_start_up_trajectory_upper_bound as
-select * from cons_start_up_trajectory_lower_bound;
 
 drop sequence id
 ;
