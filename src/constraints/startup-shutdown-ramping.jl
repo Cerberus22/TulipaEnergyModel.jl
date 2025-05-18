@@ -103,7 +103,7 @@ function add_su_sd_ramping_constraints_simple!(
                             row.max_sd_ramp * profile_times_capacity[table_name][row.id-1] +
                             row.max_ramp_down *
                             profile_times_capacity[table_name][row.id-1] *
-                            (min_outgoing_flow_duration - 1)
+                            (cons.coefficients[:min_outgoing_flow_duration][row.id-1] - 1)
                         ) * units_on[row.id-1] -
                         (
                             row.max_sd_ramp * profile_times_capacity[table_name][row.id-1] -
@@ -111,8 +111,7 @@ function add_su_sd_ramping_constraints_simple!(
                         ) * units_on[row.id],
                         base_name = "sd_ramping_simple[$(row.asset),$(row.year),$(row.rep_period),$(row.time_block_start):$(row.time_block_end)]"
                     )
-                end for (row, min_outgoing_flow_duration) in
-                zip(indices, cons.coefficients[:min_outgoing_flow_duration])
+                end for row in indices
             ],
         )
     end
@@ -222,19 +221,18 @@ function add_su_sd_ramping_constraints_tight!(
                             row.max_sd_ramp * profile_times_capacity[table_name][row.id-1] +
                             row.max_ramp_down *
                             profile_times_capacity[table_name][row.id-1] *
-                            (min_outgoing_flow_duration - 1)
+                            (cons.coefficients[:min_outgoing_flow_duration][row.id-1] - 1)
                         ) * units_on[row.id-1] +
                         (
                             profile_times_capacity[table_name][row.id-1] -
                             row.max_sd_ramp * profile_times_capacity[table_name][row.id-1] -
                             row.max_ramp_down *
                             profile_times_capacity[table_name][row.id-1] *
-                            (min_outgoing_flow_duration - 1)
+                            (cons.coefficients[:min_outgoing_flow_duration][row.id-1] - 1)
                         ) * units_on[row.id],
                         base_name = "sd_ramping_tight[$(row.asset),$(row.year),$(row.rep_period),$(row.time_block_start):$(row.time_block_end)]"
                     )
-                end for (row, min_outgoing_flow_duration) in
-                zip(indices, cons.coefficients[:min_outgoing_flow_duration])
+                end for row in indices
             ],
         )
     end
