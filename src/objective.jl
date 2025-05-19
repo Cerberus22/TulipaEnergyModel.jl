@@ -295,6 +295,7 @@ function add_objective!(connection, model, variables, expressions, model_paramet
         connection,
         "SELECT
             var.id,
+            t_objective_assets.weight_for_operation_discounts *
             t_objective_assets.start_up_cost AS cost,
         FROM var_start_up AS var
         LEFT JOIN t_objective_assets
@@ -316,6 +317,7 @@ function add_objective!(connection, model, variables, expressions, model_paramet
         connection,
         "SELECT
             var.id,
+            t_objective_assets.weight_for_operation_discounts *
             t_objective_assets.shut_down_cost AS cost,
         FROM var_shut_down AS var
         LEFT JOIN t_objective_assets
