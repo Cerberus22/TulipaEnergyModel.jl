@@ -3,7 +3,7 @@ using TulipaEnergyModel
 using TulipaIO
 using DuckDB
 
-case_studies_to_run = ["Norse", "Norse-min-up-down"]
+case_studies_to_run = ["1hr","1hrmin","2hr","2hrmin","4hr","4hrmin","6hr","6hrmin","8hr","8hrmin"]
 
 # DB connection helper
 function input_setup(input_folder)
@@ -24,12 +24,12 @@ SUITE["create_model"] = BenchmarkGroup()
 SUITE["run_model"] = BenchmarkGroup()
 
 for case in case_studies_to_run
-    input_folder = joinpath(pwd(), "test\\inputs\\$case")
+    input_folder = joinpath(pwd(), "debugging\\Experiment\\$case")
 
     # Benchmark of creating the model
     SUITE["create_model"]["$case"] = @benchmarkable begin
         create_model!(energy_problem)
-    end samples = 3 evals = 1 seconds = 100 setup = (energy_problem = EnergyProblem(input_setup($input_folder)))
+    end samples = 5 evals = 1 seconds = 86400 setup = (energy_problem = EnergyProblem(input_setup($input_folder)))
 
     # Create a model for solving
     model_to_solve = create_model!(EnergyProblem(input_setup(input_folder)))
@@ -38,7 +38,7 @@ for case in case_studies_to_run
     # Benchmark of running the model
     SUITE["run_model"]["$case"] = @benchmarkable begin
         solve_model!(energy_problem)
-    end samples = 3 evals = 1 seconds = 100 setup = (energy_problem = $model_to_solve) teardown = (global energy_problem_solved; energy_problem_solved[$key] = energy_problem)
+    end samples = 5 evals = 1 seconds = 86400 setup = (energy_problem = $model_to_solve) teardown = (global energy_problem_solved; energy_problem_solved[$key] = energy_problem)
 end
 
 results_of_run = run(SUITE, verbose=true)
@@ -52,4 +52,6 @@ for (key, value) in energy_problem_solved
     exportFolder = mkpath(joinpath(debugFolder, key))
     save_solution!(value)
     export_solution_to_csv_files(exportFolder, value)
+    filePath = joinpath(exportFolder, "objective_value.txt")
+    write(filePath, string(value.objective_value))
 end

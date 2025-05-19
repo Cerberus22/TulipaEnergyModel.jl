@@ -20,6 +20,9 @@ function add_minimum_up_time_constraints!(
                 asset_year_rep_period_dict[key] = _get_indices_for_sum(connection, table_name, row.asset, row.year, row.rep_period)
             end
         end
+
+        start_up_container, units_on_container = _get_correct_su_sd_and_units_on_variables(cons.indices, variables[:start_up].indices, variables[:start_up].container, variables[:units_on].container)
+
         attach_constraint!(
             model,
             cons,
@@ -27,10 +30,10 @@ function add_minimum_up_time_constraints!(
             [
                 @constraint(
                     model,
-                    _sum_min_up_blocks(asset_year_rep_period_dict["$(row.asset),$(row.year),$(row.rep_period)"], variables[:start_up].container, row.time_block_start) <= units_on,
+                    _sum_min_up_blocks(asset_year_rep_period_dict["$(row.asset),$(row.year),$(row.rep_period)"], start_up_container, row.time_block_start) <= units_on,
                     base_name = "$table_name[$(row.asset),$(row.year),$(row.rep_period),$(row.time_block_start):$(row.time_block_end)]"
                 ) for (row, start_up, units_on) in
-                zip(cons.indices, variables[:start_up].container, variables[:units_on].container)
+                zip(cons.indices, start_up_container, units_on_container)
             ],
         )
     end
@@ -46,6 +49,29 @@ function _sum_min_up_blocks(sum_rows, start_ups, start_of_curr_constraint)
         end
     end
     return sum
+end
+
+function _get_correct_su_sd_and_units_on_variables(cons_indices, susd_indices, susd_vars, units_on_vars)
+    susd_container = []
+    units_on_container = []
+    unique_assets = Set{String}()
+
+    for row in cons_indices
+        push!(unique_assets, row.asset)
+    end
+
+    for (i, su, uo) in zip(
+        susd_indices,
+        susd_vars,
+        units_on_vars,
+    )
+        if i.asset in unique_assets
+            push!(susd_container, su)
+            push!(units_on_container, uo)
+        end
+    end
+
+    return susd_container, units_on_container
 end
 
 function _get_indices_for_sum(connection, table_name, curr_asset, curr_year, curr_rep_period)
@@ -91,6 +117,8 @@ function add_minimum_down_time_constraints!(
 
         indices = _append_available_units_data_simple(connection, table_name)
 
+        shutdown_container, units_on_container = _get_correct_su_sd_and_units_on_variables(cons.indices, variables[:shut_down].indices, variables[:shut_down].container, variables[:units_on].container)
+
         attach_constraint!(
             model,
             cons,
@@ -98,10 +126,10 @@ function add_minimum_down_time_constraints!(
             [
                 @constraint(
                     model,
-                    _sum_min_down_blocks(asset_year_rep_period_dict["$(row.asset),$(row.year),$(row.rep_period)"], variables[:shut_down].container, row.time_block_start) <= expr_avail_simple_method[row.avail_id] - units_on,
+                    _sum_min_down_blocks(asset_year_rep_period_dict["$(row.asset),$(row.year),$(row.rep_period)"], shutdown_container, row.time_block_start) <= expr_avail_simple_method[row.avail_id] - units_on,
                     base_name = "minimum_down_time_simple_investment[$(row.asset),$(row.year),$(row.rep_period),$(row.time_block_start):$(row.time_block_end)]"
                 ) for (row, shut_down, units_on) in
-                zip(indices, variables[:shut_down].container, variables[:units_on].container)
+                zip(indices, shutdown_container, units_on_container)
             ],
         )
     end
@@ -121,6 +149,8 @@ function add_minimum_down_time_constraints!(
 
         indices = _append_available_units_data_compact(connection, table_name)
 
+        shutdown_container, units_on_container = _get_correct_su_sd_and_units_on_variables(cons.indices, variables[:shut_down].indices, variables[:shut_down].container, variables[:units_on].container)
+
         attach_constraint!(
             model,
             cons,
@@ -128,10 +158,10 @@ function add_minimum_down_time_constraints!(
             [
                 @constraint(
                     model,
-                    _sum_min_down_blocks(asset_year_rep_period_dict["$(row.asset),$(row.year),$(row.rep_period)"], variables[:shut_down].container, row.time_block_start) <= sum(expr_avail_compact_method[avail_id] for avail_id in row.avail_indices) - units_on,
+                    _sum_min_down_blocks(asset_year_rep_period_dict["$(row.asset),$(row.year),$(row.rep_period)"], shutdown_container, row.time_block_start) <= sum(expr_avail_compact_method[avail_id] for avail_id in row.avail_indices) - units_on,
                     base_name = "minimum_down_time_compact_investment[$(row.asset),$(row.year),$(row.rep_period),$(row.time_block_start):$(row.time_block_end)]"
                 ) for (row, shut_down, units_on) in
-                zip(indices, variables[:shut_down].container, variables[:units_on].container)
+                zip(indices, shutdown_container, units_on_container)
             ],
         )
     end
