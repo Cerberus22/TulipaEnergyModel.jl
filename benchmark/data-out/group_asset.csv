@@ -1,0 +1,3 @@
+min_investment_limit,max_investment_limit,name,milestone_year,invest_method
+,,wind,2050,true
+,,solar,2050,true
