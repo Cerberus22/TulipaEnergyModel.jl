@@ -432,7 +432,7 @@ from
 where
     asset.type in ('producer', 'conversion')
     and asset.unit_commitment = true
-    and asset.unit_commitment_method = 'basic'
+    and asset.unit_commitment_method = 'never'
 order by
     t_high.asset,
     t_high.year,
@@ -471,7 +471,7 @@ from
 where
     asset.type in ('producer', 'conversion')
     and asset.unit_commitment = true
-    and asset.unit_commitment_method = 'basic'
+    and asset.unit_commitment_method = 'never'
 order by
     t_high.asset,
     t_high.year,
@@ -507,7 +507,7 @@ with sorted as (
     where
         asset.type in ('producer', 'conversion')
         and asset.unit_commitment = true
-        and asset.unit_commitment_method in ('basic', 'min_up_down')
+        and asset.unit_commitment_method in ('min_up_down')
     order by
         t_high.asset,
         t_high.year,
