@@ -514,7 +514,7 @@ from
 where
     asset.type in ('producer', 'conversion')
     and asset.unit_commitment = true
-    and (asset.unit_commitment_method = 'basic' or asset.unit_commitment_method = 'susd_ramping_basic' or asset.unit_commitment_method = 'susd_ramping_tight')
+    and (asset.unit_commitment_method = 'unrelated')
 order by
     t_high.asset,
     t_high.year,
@@ -553,7 +553,7 @@ from
 where
     asset.type in ('producer', 'conversion')
     and asset.unit_commitment = true
-    and (asset.unit_commitment_method = 'basic' or asset.unit_commitment_method = 'susd_ramping_basic' or asset.unit_commitment_method = 'susd_ramping_tight')
+    and (asset.unit_commitment_method = 'unrelated')
 order by
     t_high.asset,
     t_high.year,
@@ -589,7 +589,7 @@ with sorted as (
     where
         asset.type in ('producer', 'conversion')
         and asset.unit_commitment = true
-    and (asset.unit_commitment_method = 'basic' or asset.unit_commitment_method = 'susd_ramping_basic' or asset.unit_commitment_method = 'susd_ramping_tight')
+    and (asset.unit_commitment_method = 'unrelated')
     order by
         t_high.asset,
         t_high.year,
