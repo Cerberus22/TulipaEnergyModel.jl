@@ -2,6 +2,7 @@ using BenchmarkTools
 using TulipaEnergyModel
 using TulipaIO
 using DuckDB
+using JuMP
 
 case_studies_to_run = ["1hr","1hrmin","2hr","2hrmin","4hr","4hrmin","6hr","6hrmin","8hr","8hrmin"]
 
@@ -47,8 +48,16 @@ BenchmarkTools.save("debugging\\results\\output.json", results_of_run)
 for (key, value) in energy_problem_solved
     debugFolder = joinpath(pwd(), "debugging\\results")
     exportFolder = mkpath(joinpath(debugFolder, key))
+
+    # Variable Tables
     save_solution!(value)
     export_solution_to_csv_files(exportFolder, value)
-    filePath = joinpath(exportFolder, "objective_value.txt")
-    write(filePath, string(value.objective_value))
+
+    # Objective Value
+    objValFile = joinpath(exportFolder, "objective_value.txt")
+    write(objValFile, string(value.objective_value))
+
+    # Model.lp
+    modelLpFile = joinpath(exportFolder, "model.lp")
+    JuMP.write_to_file(value.model, modelLpFile)
 end
