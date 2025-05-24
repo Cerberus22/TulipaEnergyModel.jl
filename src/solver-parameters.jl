@@ -54,7 +54,7 @@ true
 ```
 """
 default_parameters(::Any) = Dict{String,Any}()
-default_parameters(::Val{:HiGHS}) = Dict{String,Any}("output_flag" => false)
+default_parameters(::Val{:Gurobi}) = Dict{String,Any}("OutputFlag" => 1)
 default_parameters(::Val{:Cbc}) = Dict{String,Any}("logLevel" => 0)
 default_parameters(::Val{:GLPK}) = Dict{String,Any}("msg_lev" => 0)
 
