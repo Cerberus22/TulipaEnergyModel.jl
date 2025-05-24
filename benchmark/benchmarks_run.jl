@@ -31,14 +31,11 @@ for case in case_studies_to_run
         create_model!(energy_problem)
     end samples = 5 evals = 1 seconds = 86400 setup = (energy_problem = EnergyProblem(input_setup($input_folder)))
 
-    # Create a model for solving
-    model_to_solve = create_model!(EnergyProblem(input_setup(input_folder)))
-
     key = "$case"
     # Benchmark of running the model
     SUITE["run_model"]["$case"] = @benchmarkable begin
         solve_model!(energy_problem)
-    end samples = 5 evals = 1 seconds = 86400 setup = (energy_problem = $model_to_solve) teardown = (global energy_problem_solved; energy_problem_solved[$key] = energy_problem)
+    end samples = 5 evals = 1 seconds = 86400 setup = (energy_problem = create_model!(EnergyProblem(input_setup($input_folder)))) teardown = (global energy_problem_solved; energy_problem_solved[$key] = energy_problem)
 end
 
 results_of_run = run(SUITE, verbose=true)
