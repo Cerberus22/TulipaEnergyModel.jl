@@ -74,6 +74,7 @@ from
             atr.asset = t_high.asset
             and atr.time_block_start = t_high.time_block_start
             and atr.rep_period = t_high.rep_period
+            and atr.year = t_high.year
     join asset
         on
             asset.asset = t_high.asset
@@ -116,6 +117,7 @@ from
             atr.asset = t_high.asset
             and atr.time_block_start = t_high.time_block_start
             and atr.rep_period = t_high.rep_period
+            and atr.year = t_high.year
     join asset
         on
             asset.asset = t_high.asset
