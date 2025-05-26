@@ -160,13 +160,6 @@ from
 where
     asset.type = 'storage'
     and asset.use_binary_storage_method in ('binary', 'relaxed_binary')
-order by
-    t_low.asset,
-    t_low.year,
-    t_low.rep_period,
-    t_low.time_block_start,
-    t_low.time_block_end,
-    asset.use_binary_storage_method
 ;
 
 drop sequence id
@@ -259,13 +252,6 @@ from
     and flow_commission.commission_year = flow_milestone.milestone_year
 where
     flow_milestone.investable = true
-order by
-    flow.from_asset,
-    flow.to_asset,
-    flow_milestone.milestone_year,
-    flow.investment_integer,
-    flow.capacity,
-    flow_commission.investment_limit
 ;
 
 drop sequence id
@@ -289,12 +275,6 @@ from
     and asset_commission.commission_year = asset_milestone.milestone_year
 where
     asset_milestone.investable = true
-order by
-    asset.asset,
-    asset_milestone.milestone_year,
-    asset.investment_integer,
-    asset.capacity,
-    asset_commission.investment_limit
 ;
 
 drop sequence id
@@ -317,13 +297,6 @@ from
     left join asset on asset.asset = asset_both.asset
 where
     asset_both.decommissionable
-order by
-    asset_both.asset,
-    asset_both.milestone_year,
-    asset_both.commission_year,
-    asset_both.decommissionable,
-    asset_both.initial_units,
-    asset.investment_integer
 ;
 
 drop sequence id
@@ -347,12 +320,6 @@ from
 where
     flow.is_transport = true
     and flow_both.decommissionable
-order by
-    flow.from_asset,
-    flow.to_asset,
-    flow_both.milestone_year,
-    flow_both.commission_year,
-    flow.investment_integer
 ;
 
 drop sequence id
@@ -378,12 +345,6 @@ where
     asset.storage_method_energy = true
     and asset_milestone.investable = true
     and asset.type = 'storage'
-order by
-    asset.asset,
-    asset_milestone.milestone_year,
-    asset.investment_integer_storage_energy,
-    asset.capacity_storage_energy,
-    asset_commission.investment_limit_storage_energy
 ;
 
 drop sequence id
@@ -406,11 +367,6 @@ where
     asset.storage_method_energy = true
     and asset.type = 'storage'
     and asset_both.decommissionable
-order by
-    asset.asset,
-    asset_both.milestone_year,
-    asset_both.commission_year,
-    asset.investment_integer_storage_energy
 ;
 
 drop sequence id
