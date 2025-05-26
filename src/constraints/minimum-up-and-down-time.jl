@@ -20,6 +20,27 @@ function add_minimum_up_time_constraints!(connection, model, variables, expressi
                 )
             end
         end
+
+        # Preprocess
+        start_up_container = []
+        units_on_container = []
+        unique_assets = Set{String}()
+
+        for row in cons.indices
+            push!(unique_assets, row.asset)
+        end
+
+        for (i, v, v2) in zip(
+            variables[:start_up].indices,
+            variables[:start_up].container,
+            variables[:units_on].container,
+        )
+            if i.asset in unique_assets
+                push!(start_up_container, v)
+                push!(units_on_container, v2)
+            end
+        end
+
         attach_constraint!(
             model,
             cons,
@@ -29,12 +50,12 @@ function add_minimum_up_time_constraints!(connection, model, variables, expressi
                     model,
                     _sum_min_up_blocks(
                         asset_year_rep_period_dict["$(row.asset),$(row.year),$(row.rep_period)"],
-                        variables[:start_up].container,
+                        start_up_container,
                         row.time_block_start,
                     ) <= units_on,
                     base_name = "$table_name[$(row.asset),$(row.year),$(row.rep_period),$(row.time_block_start):$(row.time_block_end)]"
                 ) for (row, start_up, units_on) in
-                zip(cons.indices, variables[:start_up].container, variables[:units_on].container)
+                zip(cons.indices, start_up_container, units_on_container)
             ],
         )
     end

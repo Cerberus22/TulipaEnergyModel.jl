@@ -427,6 +427,7 @@ from
             atr.asset = t_high.asset
             and atr.time_block_start = t_high.time_block_start
             and atr.rep_period = t_high.rep_period
+            and t_high.year = atr.year
     join asset
         on
             asset.asset = t_high.asset
@@ -468,6 +469,7 @@ from
             atr.asset = t_high.asset
             and atr.time_block_start = t_high.time_block_start
             and atr.rep_period = t_high.rep_period
+            and t_high.year = atr.year
     join asset
         on
             asset.asset = t_high.asset
@@ -507,6 +509,7 @@ with sorted as (
             on atr.asset = t_high.asset
             and atr.time_block_start = t_high.time_block_start
             and t_high.rep_period = atr.rep_period
+            and t_high.year = atr.year
         join asset
             on asset.asset = t_high.asset
     where
@@ -523,7 +526,10 @@ numbered as (
     select
         sorted.*,
         row_number() over (
-        partition by sorted.asset
+        partition by
+            sorted.asset,
+            sorted.year,
+            sorted.rep_period
         order by
             sorted.asset,
             sorted.year,

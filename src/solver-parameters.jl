@@ -57,6 +57,8 @@ default_parameters(::Any) = Dict{String,Any}()
 default_parameters(::Val{:HiGHS}) = Dict{String,Any}("output_flag" => false)
 default_parameters(::Val{:Cbc}) = Dict{String,Any}("logLevel" => 0)
 default_parameters(::Val{:GLPK}) = Dict{String,Any}("msg_lev" => 0)
+default_parameters(::Val{:Gurobi}) =
+    Dict{String,Any}("MIPFocus" => 3, "Cuts" => 2, "Presolve" => 2, "Heuristics" => 1)
 
 function default_parameters(::Type{T}) where {T<:MathOptInterface.AbstractOptimizer}
     solver_name = split(string(T), ".")[1]

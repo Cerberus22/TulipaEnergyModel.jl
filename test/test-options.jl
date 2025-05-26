@@ -60,7 +60,7 @@ end
     @testset "HiGHS" begin
         expected = Dict{String,Any}("output_flag" => false)
         @test TulipaEnergyModel.default_parameters(Val(:HiGHS)) == expected
-        @test TulipaEnergyModel.default_parameters(HiGHS.Optimizer) == expected
+        @test TulipaEnergyModel.default_parameters(Gurobi.Optimizer) == expected
         @test TulipaEnergyModel.default_parameters(:HiGHS) == expected
         @test TulipaEnergyModel.default_parameters("HiGHS") == expected
     end
