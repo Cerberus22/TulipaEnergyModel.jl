@@ -518,7 +518,7 @@ numbered as (
     select
         sorted.*,
         row_number() over (
-        partition by sorted.asset
+        partition by sorted.asset, sorted.rep_period, sorted.year
         order by
             sorted.asset,
             sorted.year,
