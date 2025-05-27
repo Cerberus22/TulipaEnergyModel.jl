@@ -26,7 +26,7 @@ function add_su_sd_eq_units_on_diff_constraints!(
                 variables[:units_on].container,
             ),
         )
-            if (ind.asset == last_asset && ind.rep_period = last_rep_period)
+            if ((ind.asset == last_asset) && (ind.rep_period == last_rep_period))
                 push!(startup_container, su)
                 push!(shutdown_container, sd)
                 push!(units_on_now_container, uo)
