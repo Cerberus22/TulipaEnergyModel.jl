@@ -41,7 +41,8 @@ function add_su_sd_eq_units_on_diff_constraints!(
         container = collect(variables[:units_on].container)
 
         for i in (1:(length(indices)-1))
-            if indices[i].asset == indices[i+1].asset
+            if indices[i].asset == indices[i+1].asset &&
+               indices[i].rep_period == indices[i+1].rep_period
                 push!(units_on_prev_container, container[i])
             end
         end
