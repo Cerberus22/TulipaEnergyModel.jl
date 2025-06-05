@@ -235,16 +235,32 @@ function add_su_sd_ramping_with_vars_constraints!(
 
                     p_max = profile_times_capacity[table_name][row.id-1]
 
+                    sum_up = 0
+                    sum_down = 0
+
+                    for i in 0:duration[row.id-1]
+                        sum_up += max(0, p_max - p_start_up_ramp - p_ramp_up * i)
+                        sum_down += max(0, p_max - p_shut_down_ramp - p_ramp_down * i)
+                    end
+
                     @constraint(
                         model,
                         flow_total[row.id-1] <=
-                        p_max * units_on[row.id-1] -
-                        (p_max - p_start_up_ramp - p_ramp_up * (duration[row.id-1] - 1)) *
-                        start_up[row.id-1] -
-                        (p_max - p_shut_down_ramp - p_ramp_down * (duration[row.id-1] - 1)) *
-                        shut_down[row.id],
+                        p_max * units_on[row.id-1] - sum_up * start_up[row.id-1] -
+                        sum_down * shut_down[row.id],
                         base_name = "$table_name[$(row.asset),$(row.year),$(row.rep_period),$(row.time_block_start):$(row.time_block_end)]"
                     )
+
+                    # @constraint(
+                    #     model,
+                    #     flow_total[row.id-1] <=
+                    #     p_max * units_on[row.id-1] -
+                    #     max((p_max - p_start_up_ramp - p_ramp_up * (duration[row.id-1] - 1)), 0) *
+                    #     start_up[row.id-1] -
+                    #     max((p_max - p_shut_down_ramp - p_ramp_down * (duration[row.id-1] - 1)), 0) *
+                    #     shut_down[row.id],
+                    #     base_name = "$table_name[$(row.asset),$(row.year),$(row.rep_period),$(row.time_block_start):$(row.time_block_end)]"
+                    # )
                 end for row in indices_dict[table_name]
             ],
         )

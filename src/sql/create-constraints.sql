@@ -244,7 +244,7 @@ from
 where
     asset.type in ('producer', 'conversion')
     and asset.unit_commitment
-    and asset.unit_commitment_method in ('basic', 'su_sd_ramp_with_vars')
+    and asset.unit_commitment_method in ('basic')
 ;
 
 drop sequence id
@@ -264,7 +264,7 @@ where
     asset.type in ('producer', 'conversion')
     and asset.ramping
     and asset.unit_commitment
-    and asset.unit_commitment_method in ('basic', 'su_sd_ramp_with_vars')
+    and asset.unit_commitment_method in ('basic')
 ;
 
 drop sequence id
@@ -285,6 +285,7 @@ where
     and asset.ramping
     and not asset.unit_commitment
     and asset.unit_commitment_method != 'basic'
+    and asset.unit_commitment_method != 'su_sd_ramp_with_vars'
 ;
 
 create table cons_balance_storage_rep_period as
@@ -434,7 +435,7 @@ from
 where
     asset.type in ('producer', 'conversion')
     and asset.unit_commitment = true
-    and asset.unit_commitment_method in ('basic', 'su_sd_ramp_with_vars')
+    and asset.unit_commitment_method in ('su_sd_ramp_with_vars')
 order by
     t_high.asset,
     t_high.year,
@@ -475,7 +476,7 @@ from
 where
     asset.type in ('producer', 'conversion')
     and asset.unit_commitment = true
-    and asset.unit_commitment_method in ('basic', 'su_sd_ramp_with_vars')
+    and asset.unit_commitment_method in ('su_sd_ramp_with_vars')
 order by
     t_high.asset,
     t_high.year,
@@ -513,7 +514,7 @@ with sorted as (
     where
         asset.type in ('producer', 'conversion')
         and asset.unit_commitment = true
-        and asset.unit_commitment_method in ('basic', 'su_sd_ramp_with_vars')
+        and asset.unit_commitment_method in ('su_sd_ramp_with_vars')
     order by
         t_high.asset,
         t_high.year,
