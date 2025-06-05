@@ -81,6 +81,7 @@ with sub as (
     where
         asset.type in ('producer', 'conversion')
         and asset.unit_commitment = true
+        and asset.unit_commitment_method = 'trajectory'
     order by
         t_high.asset,
         t_high.year,
@@ -126,6 +127,7 @@ with sub as (
     where
         asset.type in ('producer', 'conversion')
         and asset.unit_commitment = true
+        and asset.unit_commitment_method = 'trajectory'
     order by
         t_high.asset,
         t_high.year,
@@ -137,7 +139,8 @@ with sub as (
 select
     nextval('id') as id,
     sub.*
-from sub
+from
+    sub
 ;
 
 drop sequence id

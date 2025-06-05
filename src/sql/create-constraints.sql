@@ -226,6 +226,7 @@ from
 where
     asset.type in ('producer', 'conversion')
     and asset.unit_commitment
+    and asset.unit_commitment_method in ('basic', 'min_up_down')
 ;
 
 drop sequence id
@@ -513,49 +514,23 @@ with sorted as (
     where
         asset.type in ('producer', 'conversion')
         and asset.unit_commitment = true
-        and asset.unit_commitment_method == 'trajectory'
+        and asset.unit_commitment_method = 'trajectory'
     order by
         t_high.asset,
         t_high.year,
         t_high.rep_period,
         t_high.time_block_start
-),
-numbered as (
-    select
-        sorted.*,
-        row_number() over (
-        partition by
-            sorted.asset,
-            sorted.year,
-            sorted.rep_period
-        order by
-            sorted.asset,
-            sorted.year,
-            sorted.rep_period,
-            sorted.time_block_start
-        ) as rn
-    from
-        sorted
-),
-sub as (
-    select
-        numbered.*
-    from
-        numbered
-    where
-        rn > 1
-    order by
-        numbered.asset,
-        numbered.year,
-        numbered.rep_period,
-        numbered.time_block_start
-
 )
 select
     nextval('id') as id,
-    sub.*
+    sorted.*
 from
-    sub
+    sorted
+order by
+    sorted.asset,
+    sorted.year,
+    sorted.rep_period,
+    sorted.time_block_start
 ;
 
 drop sequence id

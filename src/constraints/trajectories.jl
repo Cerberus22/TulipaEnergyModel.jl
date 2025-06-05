@@ -149,8 +149,8 @@ function add_trajectory_constraints!(
                         model,
                         flow_total[row.id] >=
                         pmin_sum[row.id] +
-                        start_up[row.id] * start_up_sum +
-                        shut_down[row.id] * shut_down_sum,
+                        (start_up[row.id] * start_up_sum + shut_down[row.id] * shut_down_sum) /
+                        (row.time_block_end - row.time_block_start + 1),
                         base_name = "$table_name[$(row.asset),$(row.year),$(row.rep_period),$(row.time_block_start):$(row.time_block_end)]"
                     )
                 end for row in indices
@@ -206,8 +206,8 @@ function add_trajectory_constraints!(
                         model,
                         flow_total[row.id] <=
                         pmax_sum[row.id] +
-                        start_up[row.id] * start_up_sum +
-                        shut_down[row.id] * shut_down_sum,
+                        (start_up[row.id] * start_up_sum + shut_down[row.id] * shut_down_sum) /
+                        (row.time_block_end - row.time_block_start + 1),
                         base_name = "$table_name[$(row.asset),$(row.year),$(row.rep_period),$(row.time_block_start):$(row.time_block_end)]"
                     )
                 end for row in indices
@@ -225,7 +225,7 @@ function _append_data_to_trajectory(connection, table_name)
             start_up.time_block_start AS next_SU_start,
             shut_down.time_block_start AS last_SD_start,
             asset.start_trajectory        AS start_trajectory,
-            asset.shut_trajectory        AS shut_trajectory,
+            asset.shut_trajectory         AS shut_trajectory,
             asset.capacity          AS capacity,
             profiles.profile_name   AS profile_name,
             expr_avail.id           AS avail_id
@@ -241,9 +241,10 @@ function _append_data_to_trajectory(connection, table_name)
             AND profiles.profile_type = 'availability'
         LEFT JOIN asset_time_resolution_rep_period AS atr
             ON  cons.asset = atr.asset
+            AND cons.year = atr.year
+            AND cons.rep_period = atr.rep_period
             AND cons.time_block_start >= atr.time_block_start
             AND cons.time_block_end <= atr.time_block_end
-            AND cons.rep_period = atr.rep_period
         LEFT JOIN var_start_up AS start_up
             ON cons.asset = start_up.asset
             AND cons.year = start_up.year
