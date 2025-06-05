@@ -4,7 +4,7 @@ using TulipaIO
 using DuckDB
 using JuMP
 
-case_studies_to_run = ["1hr","1hrmin","2hr","2hrmin","4hr","4hrmin","6hr","6hrmin","8hr","8hrmin","geographical","geographicalmin"]
+case_studies_to_run = ["1hr","1hrmin","2hr","2hrmin","3hr","3hrmin","4hr","4hrmin","6hr","6hrmin","GD","GDmin"]
 
 # DB connection helper
 function input_setup(input_folder)
@@ -317,24 +317,38 @@ SUITE["create_model"] = BenchmarkGroup()
 SUITE["run_model"] = BenchmarkGroup()
 
 for case in case_studies_to_run
-    input_folder = joinpath(pwd(), "debugging\\Experiment\\$case")
+    input_folder = joinpath(pwd(), "debugging\\experiment-input\\$case")
 
     # Benchmark of creating the model
     SUITE["create_model"]["$case"] = @benchmarkable begin
         create_model!(energy_problem)
-    end samples = 10 evals = 1 seconds = 86400 setup = (energy_problem = EnergyProblem(input_setup($input_folder)))
+    end samples = 30 evals = 1 seconds = 86400 setup = (energy_problem = EnergyProblem(input_setup($input_folder)))
 
     key = "$case"
     # Benchmark of running the model
     SUITE["run_model"]["$case"] = @benchmarkable begin
         solve_model!(energy_problem)
-    end samples = 10 evals = 1 seconds = 86400 setup = (energy_problem = create_model!(EnergyProblem(input_setup($input_folder)))) teardown = (global energy_problem_solved; energy_problem_solved[$key] = energy_problem)
+    end samples = 30 evals = 1 seconds = 86400 setup =
+        begin
+            energy_problem = create_model!(EnergyProblem(input_setup($input_folder)))
+            JuMP.set_optimizer_attribute(energy_problem.model, "seed", Int(rand(1:2e6)))
+        end
 end
 
 results_of_run = run(SUITE, verbose=true)
 
 # Save run times
 BenchmarkTools.save("debugging\\results\\output.json", results_of_run)
+
+# Solve model with seed = 0
+for case in case_studies_to_run
+    input_folder = joinpath(pwd(), "debugging\\experiment-input\\$case")
+    energy_problem = create_model!(EnergyProblem(input_setup(input_folder)))
+    JuMP.set_optimizer_attribute(energy_problem.model, "seed", Int(0))
+    solve_model!(energy_problem)
+    key = "$case"
+    energy_problem_solved[key] = energy_problem
+end
 
 # Save optimal solution
 for (key, value) in energy_problem_solved
