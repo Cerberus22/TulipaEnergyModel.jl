@@ -81,6 +81,7 @@ with sub as (
     where
         asset.type in ('producer', 'conversion')
         and asset.unit_commitment = true
+        and asset.unit_commitment_method in ('su_sd_ramp_with_vars')
     order by
         t_high.asset,
         t_high.year,
@@ -125,6 +126,7 @@ with sub as (
     where
         asset.type in ('producer', 'conversion')
         and asset.unit_commitment = true
+        and asset.unit_commitment_method in ('su_sd_ramp_with_vars')
     order by
         t_high.asset,
         t_high.year,
