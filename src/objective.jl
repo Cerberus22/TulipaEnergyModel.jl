@@ -302,7 +302,11 @@ function add_objective!(connection, model, variables, expressions, model_paramet
             ON var.asset = t_objective_assets.asset
             AND var.year = t_objective_assets.milestone_year
         WHERE t_objective_assets.start_up_cost IS NOT NULL
-        ORDER BY var.id
+        ORDER BY var.asset,
+            var.year,
+            var.rep_period,
+            var.time_block_start,
+            var.time_block_end
         ",
     )
 
@@ -324,7 +328,11 @@ function add_objective!(connection, model, variables, expressions, model_paramet
             ON var.asset = t_objective_assets.asset
             AND var.year = t_objective_assets.milestone_year
         WHERE t_objective_assets.shut_down_cost IS NOT NULL
-        ORDER BY var.id
+        ORDER BY var.asset,
+            var.year,
+            var.rep_period,
+            var.time_block_start,
+            var.time_block_end
         ",
     )
 

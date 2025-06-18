@@ -21,6 +21,7 @@ function add_start_up_and_shut_down_lower_bound_constraints!(
         shutdown_container = []
         units_on_now_container = []
         last_asset = nothing
+        last_rep_period = -1
         for (i, (ind, su, sd, uo)) in enumerate(
             zip(
                 variables[:units_on].indices,
@@ -29,12 +30,13 @@ function add_start_up_and_shut_down_lower_bound_constraints!(
                 variables[:units_on].container,
             ),
         )
-            if (ind.asset == last_asset)
+            if (ind.asset == last_asset && ind.rep_period == last_rep_period)
                 push!(startup_container, su)
                 push!(shutdown_container, sd)
                 push!(units_on_now_container, uo)
             end
             last_asset = ind.asset
+            last_rep_period = ind.rep_period
         end
 
         units_on_prev_container = []
@@ -43,7 +45,8 @@ function add_start_up_and_shut_down_lower_bound_constraints!(
         container = collect(variables[:units_on].container)
 
         for i in (1:(length(indices)-1))
-            if indices[i].asset == indices[i+1].asset
+            if indices[i].asset == indices[i+1].asset &&
+               indices[i].rep_period == indices[i+1].rep_period
                 push!(units_on_prev_container, container[i])
             end
         end
