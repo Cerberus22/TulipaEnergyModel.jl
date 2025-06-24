@@ -13,7 +13,15 @@
 [![All Contributors](https://img.shields.io/github/all-contributors/TulipaEnergy/TulipaEnergyModel.jl?labelColor=5e1ec7&color=c0ffee&style=flat-square)](#contributors)
 [![BestieTemplate](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/JuliaBesties/BestieTemplate.jl/main/docs/src/assets/badge.json)](https://github.com/JuliaBesties/BestieTemplate.jl)
 
-This repository is a fork of the [Tulipa Energy Model respository](https://github.com/TulipaEnergy/TulipaEnergyModel.jl) created as part of the 2024/2025 edition of the [CSE3000 Research Project](https://github.com/TU-Delft-CSE/Research-Project) course at TU Delft. It was made by Rūta Giedrytė, Yurian Lagrand, Karol Sperczyński, Gabriel Tertelici, and Uroš Gluščević.
+This repository is a fork of the [Tulipa Energy Model respository](https://github.com/TulipaEnergy/TulipaEnergyModel.jl) created as part of the 2024/2025 edition of the [CSE3000 Research Project](https://github.com/TU-Delft-CSE/Research-Project) course at TU Delft. It was made by Rūta Giedrytė, Yurian Lagrand, Karol Sperczyński, Gabriel Tertelici, and Uroš Gluščević. The code for the individual research questions can be found on the following branches:
+
+| Research Question Number | Student           | Branch                               |
+|--------------------------|-------------------|--------------------------------------|
+| 1                        | Uroš Gluščević    | startup_shutdown_constraints_eq_9    |
+| 2                        | Karol Sperczyński | startup-shutdown-ramping-constraints |
+| 3                        | Rūta Giedrytė     | startup_shutdown_ramping_with_vars   |
+| 4                        | Yurian Lagrand    | trajectory_constraints               |
+| 5                        | Gabriel Tertelici | minimum_up_down_time                 |
 
 This package provides an optimization model for the electricity market and its coupling with other energy sectors (e.g., hydrogen, heat, natural gas, etc.). The main objective is to determine the optimal investment and operation decisions for different types of assets (e.g., producers, consumers, conversions, storages, and transports).
 
