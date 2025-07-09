@@ -310,12 +310,9 @@ function add_objective!(connection, model, variables, expressions, model_paramet
         ",
     )
 
-    start_up_cost = @expression(
-        model,
-        sum(
-            row.cost * start_up for (row, start_up) in zip(indices, variables[:start_up].container)
-        )
-    )
+    var_start_up = variables[:start_up].container
+
+    start_up_cost = @expression(model, sum(row.cost * var_start_up[row.id] for row in indices))
 
     indices = DuckDB.query(
         connection,
@@ -336,13 +333,9 @@ function add_objective!(connection, model, variables, expressions, model_paramet
         ",
     )
 
-    shut_down_cost = @expression(
-        model,
-        sum(
-            row.cost * shut_down for
-            (row, shut_down) in zip(indices, variables[:shut_down].container)
-        )
-    )
+    var_shut_down = variables[:shut_down].container
+
+    shut_down_cost = @expression(model, sum(row.cost * var_shut_down[row.id] for row in indices))
 
     ## Objective function
     @objective(
