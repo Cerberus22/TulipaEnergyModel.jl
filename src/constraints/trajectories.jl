@@ -106,9 +106,10 @@ function add_trajectory_constraints!(
             cons,
             "start_up_$(table_name)_lower_bound" |> Symbol,
             [
-                let su_traj = read_trajectory(row.start_trajectory),
+                let su_traj =
+                        read_trajectory(row.start_trajectory, row.min_op_point * row.capacity),
                     t_su = length(su_traj),
-                    sd_traj = read_trajectory(row.shut_trajectory),
+                    sd_traj = read_trajectory(row.shut_trajectory, row.min_op_point * row.capacity),
                     t_sd = length(sd_traj),
                     t_start = row.time_block_start,
                     t_end = row.time_block_end
@@ -163,9 +164,10 @@ function add_trajectory_constraints!(
             cons,
             "start_up_$(table_name)_upper_bound" |> Symbol,
             [
-                let su_traj = read_trajectory(row.start_trajectory),
+                let su_traj =
+                        read_trajectory(row.start_trajectory, row.min_op_point * row.capacity),
                     t_su = length(su_traj),
-                    sd_traj = read_trajectory(row.shut_trajectory),
+                    sd_traj = read_trajectory(row.shut_trajectory, row.min_op_point * row.capacity),
                     t_sd = length(sd_traj),
                     t_start = row.time_block_start,
                     t_end = row.time_block_end
@@ -226,6 +228,7 @@ function _append_data_to_trajectory(connection, table_name)
             shut_down.time_block_start AS last_SD_start,
             asset.start_trajectory        AS start_trajectory,
             asset.shut_trajectory         AS shut_trajectory,
+            asset.min_operating_point     AS min_op_point,
             asset.capacity          AS capacity,
             profiles.profile_name   AS profile_name,
             expr_avail.id           AS avail_id
