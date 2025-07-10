@@ -31,7 +31,6 @@ function compute_constraints_indices(connection)
             :group_min_investment_limit,
             :su_sd_eq_units_on_diff,
             :start_up_upper_bound,
-            :shut_down_upper_bound,
             :su_ramping_simple,
             :sd_ramping_simple,
             :su_ramping_tight,
