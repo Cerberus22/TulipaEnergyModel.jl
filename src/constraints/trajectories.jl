@@ -2,9 +2,9 @@ export add_start_up_trajectory_lower_bound_constarints!
 export add_start_up_trajectory_upper_bound_constraints!
 
 """
-    add_start_up_trajectory_lower_bound_constraints!(model, constraints)
+    add_trajectory_constraints!(model, constraints)
 
-Adds the start up trajectory lower bound constraints to the model.
+Adds the start up trajectory constraints to the model.
 Assets using this constraint should have a minimum down time >= length of start up trajectory + length of shut down trajectory
 """
 function add_trajectory_constraints!(
@@ -230,8 +230,7 @@ function _append_data_to_trajectory(connection, table_name)
             asset.shut_trajectory         AS shut_trajectory,
             asset.min_operating_point     AS min_op_point,
             asset.capacity          AS capacity,
-            profiles.profile_name   AS profile_name,
-            expr_avail.id           AS avail_id
+            profiles.profile_name   AS profile_name
         FROM cons_$table_name AS cons
         LEFT JOIN expr_available_asset_units_simple_method AS expr_avail
             ON cons.asset = expr_avail.asset
@@ -258,7 +257,6 @@ function _append_data_to_trajectory(connection, table_name)
             AND cons.year = shut_down.year
             AND cons.rep_period = shut_down.rep_period
             AND atr.time_block_start = shut_down.time_block_start
-        WHERE asset.investment_method in ('simple', 'none')
         ORDER BY cons.id
         ",
     )
