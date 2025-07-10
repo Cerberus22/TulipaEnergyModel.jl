@@ -67,7 +67,7 @@ function create_model(
     constraints,
     profiles,
     model_parameters;
-    optimizer = HiGHS.Optimizer,
+    optimizer = Gurobi.Optimizer,
     optimizer_parameters = default_parameters(optimizer),
     model_file_name = "",
     enable_names = true,
@@ -200,6 +200,30 @@ function create_model(
         variables,
         expressions,
         constraints,
+    )
+
+    @timeit to "add_minimum_up_time_constraints!" add_minimum_up_time_constraints!(
+        connection,
+        model,
+        variables,
+        expressions,
+        constraints,
+    )
+    @timeit to "add_minimum_down_time_constraints!" add_minimum_down_time_constraints!(
+        connection,
+        model,
+        variables,
+        expressions,
+        constraints,
+    )
+
+    @timeit to "add_trajectory_constraints!" add_trajectory_constraints!(
+        connection,
+        model,
+        variables,
+        expressions,
+        constraints,
+        profiles,
     )
 
     if model_file_name != ""

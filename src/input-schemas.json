@@ -126,6 +126,16 @@
       "description": "Whether asset has ramping constraints or not.",
       "type": "BOOLEAN"
     },
+    "shut_trajectory": {
+      "default": null,
+      "description": "Shut-down trajectory of the asset",
+      "type": "VARCHAR"
+    },
+    "start_trajectory": {
+      "default": null,
+      "description": "Start-up trajectory of the asset",
+      "type": "VARCHAR"
+    },
     "storage_method_energy": {
       "default": false,
       "description": "Whether there is independent investment on storage capacity or not. If false, the investment on storage capacity uses the energy_to_power_ratio as a constant fixed value.",
@@ -167,7 +177,9 @@
       "constraints": {
         "oneOf": [
           null,
-          "basic"
+          "basic",
+          "trajectory",
+          "min_up_down"
         ]
       },
       "default": null,

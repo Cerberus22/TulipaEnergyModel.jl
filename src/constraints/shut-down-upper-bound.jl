@@ -33,7 +33,6 @@ function add_shut_down_upper_bound_constraints!(
             ],
         )
     end
-    println()
     return nothing
 end
 

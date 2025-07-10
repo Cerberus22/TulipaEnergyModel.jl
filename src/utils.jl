@@ -94,3 +94,19 @@ function _create_group_table_if_not_exist!(
 
     return
 end
+
+function read_trajectory(trajectory::String, target::Float64 = 0.0)
+    s = split(trajectory, ",")
+    if s[1] == "linear"
+        len = parse(Int, s[3])
+        step = target / len
+        traj = [(i * step + (step / 2)) for i in 0:len][1:len]
+        if s[2] == "up"
+            return traj
+        elseif s[2] == "down"
+            return reverse!(traj)
+        end
+    else
+        return parse.(Int, split(trajectory, ","))
+    end
+end

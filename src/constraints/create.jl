@@ -32,6 +32,10 @@ function compute_constraints_indices(connection)
             :su_sd_eq_units_on_diff,
             :start_up_upper_bound,
             :shut_down_upper_bound,
+            :trajectory,
+            :minimum_up_time,
+            :minimum_down_time_simple_investment,
+            :minimum_down_time_compact_investment,
         )
     )
 

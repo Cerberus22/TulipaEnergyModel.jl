@@ -558,6 +558,7 @@ function add_expressions_to_constraints!(connection, variables, constraints)
         :max_ramp_with_unit_commitment,
         :max_ramp_without_unit_commitment,
         :max_output_flow_with_basic_unit_commitment,
+        :trajectory,
     )
         @timeit to "add_expression_terms_rep_period_constraints!" add_expression_terms_rep_period_constraints!(
             connection,
@@ -592,6 +593,8 @@ function add_expressions_to_constraints!(connection, variables, constraints)
         :min_output_flow_with_unit_commitment,
         :max_output_flow_with_basic_unit_commitment,
         :max_ramp_with_unit_commitment,
+        :trajectory,
+        :su_sd_eq_units_on_diff,
     )
         @timeit to "attach units_on expression to $table_name" attach_expression_on_constraints_grouping_variables!(
             connection,
@@ -603,6 +606,18 @@ function add_expressions_to_constraints!(connection, variables, constraints)
         )
     end
 
+    for table_name in (:trajectory, :su_sd_eq_units_on_diff)
+        for expr in (:start_up, :shut_down)
+            @timeit to "attach $expr expression to $table_name" attach_expression_on_constraints_grouping_variables!(
+                connection,
+                constraints[table_name],
+                variables[expr],
+                expr,
+                workspace,
+                agg_strategy = :unique_sum,
+            )
+        end
+    end
     return
 end
 
