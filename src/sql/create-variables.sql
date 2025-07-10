@@ -81,7 +81,7 @@ with sub as (
     where
         asset.type in ('producer', 'conversion')
         and asset.unit_commitment = true
-        and asset.unit_commitment_method in ('min_up_down', 'trajectory')
+        and asset.unit_commitment_method in ('min_up_down', 'trajectory', 'su_sd_ramp_with_vars')
     order by
         t_high.asset,
         t_high.year,
