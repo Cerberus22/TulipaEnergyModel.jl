@@ -178,6 +178,8 @@
         "oneOf": [
           null,
           "basic",
+          "susd_ramping_basic",
+          "susd_ramping_tight",
           "su_sd_ramp_with_vars",
           "trajectory",
           "min_up_down"

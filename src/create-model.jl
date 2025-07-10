@@ -202,6 +202,24 @@ function create_model(
         constraints,
     )
 
+    @timeit to "add_su_sd_ramping_constraints_simple!" add_su_sd_ramping_constraints_simple!(
+        connection,
+        model,
+        variables,
+        expressions,
+        constraints,
+        profiles,
+    )
+
+    @timeit to "add_su_sd_ramping_constraints_tight!" add_su_sd_ramping_constraints_tight!(
+        connection,
+        model,
+        variables,
+        expressions,
+        constraints,
+        profiles,
+    )
+
     @timeit to "add_su_ramp_vars_flow_diff_constraints!" add_su_ramp_vars_flow_diff_constraints!(
         connection,
         model,

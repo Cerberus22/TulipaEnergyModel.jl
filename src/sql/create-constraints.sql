@@ -245,7 +245,7 @@ from
 where
     asset.type in ('producer', 'conversion')
     and asset.unit_commitment
-    and asset.unit_commitment_method in ('basic', 'su_sd_ramp_with_vars'. 'min_up_down')
+    and asset.unit_commitment_method in ('basic', 'susd_ramping_basic', 'susd_ramping_tight', 'su_sd_ramp_with_vars'. 'min_up_down')
 ;
 
 drop sequence id
@@ -265,7 +265,89 @@ where
     asset.type in ('producer', 'conversion')
     and asset.ramping
     and asset.unit_commitment
-    and asset.unit_commitment_method in ('basic', 'su_sd_ramp_with_vars', 'trajectory')
+    and asset.unit_commitment_method in ('basic', 'su_sd_ramp_with_vars', 'trajectory', 'susd_ramping_basic', 'susd_ramping_tight')
+;
+
+drop sequence id
+;
+
+create sequence id start 1
+;
+
+create table cons_su_ramping_simple as
+select
+    nextval('id') as id,
+    t_high.*
+from
+    t_highest_assets_and_out_flows as t_high
+    left join asset on t_high.asset = asset.asset
+where
+    asset.type in ('producer', 'conversion')
+    and asset.ramping
+    and asset.unit_commitment
+    and (asset.unit_commitment_method = 'susd_ramping_basic' or asset.unit_commitment_method = 'susd_ramping_tight')
+
+;
+
+drop sequence id
+;
+
+create sequence id start 1
+;
+
+create table cons_sd_ramping_simple as
+select
+    nextval('id') as id,
+    t_high.*
+from
+    t_highest_assets_and_out_flows as t_high
+    left join asset on t_high.asset = asset.asset
+where
+    asset.type in ('producer', 'conversion')
+    and asset.ramping
+    and asset.unit_commitment
+    and (asset.unit_commitment_method = 'susd_ramping_basic' or asset.unit_commitment_method = 'susd_ramping_tight')
+
+;
+
+drop sequence id
+;
+
+create sequence id start 1
+;
+
+create table cons_su_ramping_tight as
+select
+    nextval('id') as id,
+    t_high.*
+from
+    t_highest_assets_and_out_flows as t_high
+    left join asset on t_high.asset = asset.asset
+where
+    asset.type in ('producer', 'conversion')
+    and asset.ramping
+    and asset.unit_commitment
+    and (asset.unit_commitment_method = 'susd_ramping_tight')
+;
+
+drop sequence id
+;
+
+create sequence id start 1
+;
+
+create table cons_sd_ramping_tight as
+select
+    nextval('id') as id,
+    t_high.*
+from
+    t_highest_assets_and_out_flows as t_high
+    left join asset on t_high.asset = asset.asset
+where
+    asset.type in ('producer', 'conversion')
+    and asset.ramping
+    and asset.unit_commitment
+    and (asset.unit_commitment_method = 'susd_ramping_tight')
 ;
 
 drop sequence id
@@ -285,7 +367,7 @@ where
     asset.type in ('producer', 'storage', 'conversion')
     and asset.ramping
     and not asset.unit_commitment
-    and asset.unit_commitment_method != 'basic'
+    and asset.unit_commitment_method != 'basic' and asset.unit_commitment_method != 'susd_ramping_basic'
 ;
 
 create table cons_balance_storage_rep_period as

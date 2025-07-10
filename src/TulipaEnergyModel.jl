@@ -12,7 +12,6 @@ using JSON: JSON
 using TulipaIO: TulipaIO
 
 ## Optimization
-using HiGHS: HiGHS
 using Gurobi: Gurobi
 using JuMP: JuMP, @constraint, @expression, @objective, @variable
 using MathOptInterface: MathOptInterface
