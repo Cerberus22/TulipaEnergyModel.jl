@@ -41,6 +41,10 @@ function compute_constraints_indices(connection)
             :minimum_up_time,
             :minimum_down_time_simple_investment,
             :minimum_down_time_compact_investment,
+            :shut_down_upper_bound_simple_investment,
+            :shut_down_upper_bound_compact_investment,
+            :start_up_lower_bound,
+            :shut_down_lower_bound,
         )
     )
 
