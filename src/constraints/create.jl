@@ -35,7 +35,6 @@ function compute_constraints_indices(connection)
             :sd_ramping_simple,
             :su_ramping_tight,
             :sd_ramping_tight,
-            :su_ramp_vars_flow_diff,
             :trajectory,
             :minimum_up_time,
             :minimum_down_time_simple_investment,
@@ -44,6 +43,11 @@ function compute_constraints_indices(connection)
             :shut_down_upper_bound_compact_investment,
             :start_up_lower_bound,
             :shut_down_lower_bound,
+            :su_ramp_vars_flow_diff,
+            :sd_ramp_vars_flow_diff,
+            :su_ramp_vars_flow_upper_bound,
+            :sd_ramp_vars_flow_upper_bound,
+            :su_sd_ramp_vars_flow_with_high_uptime,
         )
     )
 

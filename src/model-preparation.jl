@@ -562,8 +562,12 @@ function add_expressions_to_constraints!(connection, variables, constraints)
         :sd_ramping_simple,
         :su_ramping_tight,
         :sd_ramping_tight,
-        :su_ramp_vars_flow_diff,
         :trajectory,
+        :su_ramp_vars_flow_diff,
+        :sd_ramp_vars_flow_diff,
+        :su_ramp_vars_flow_upper_bound,
+        :sd_ramp_vars_flow_upper_bound,
+        :su_sd_ramp_vars_flow_with_high_uptime,
     )
         @timeit to "add_expression_terms_rep_period_constraints!" add_expression_terms_rep_period_constraints!(
             connection,
@@ -603,8 +607,13 @@ function add_expressions_to_constraints!(connection, variables, constraints)
         :sd_ramping_simple,
         :su_ramping_tight,
         :sd_ramping_tight,
-        :su_ramp_vars_flow_diff,
         :trajectory,
+        :su_sd_eq_units_on_diff,
+        :su_ramp_vars_flow_diff,
+        :sd_ramp_vars_flow_diff,
+        :su_ramp_vars_flow_upper_bound,
+        :sd_ramp_vars_flow_upper_bound,
+        :su_sd_ramp_vars_flow_with_high_uptime,
         :su_sd_eq_units_on_diff,
     )
         @timeit to "attach units_on expression to $table_name" attach_expression_on_constraints_grouping_variables!(
@@ -615,19 +624,22 @@ function add_expressions_to_constraints!(connection, variables, constraints)
             workspace,
             agg_strategy = :unique_sum,
         )
-    end
-
-    for table_name in (:trajectory, :su_sd_eq_units_on_diff)
-        for expr in (:start_up, :shut_down)
-            @timeit to "attach $expr expression to $table_name" attach_expression_on_constraints_grouping_variables!(
-                connection,
-                constraints[table_name],
-                variables[expr],
-                expr,
-                workspace,
-                agg_strategy = :unique_sum,
-            )
-        end
+        @timeit to "attach start_up expression to $table_name" attach_expression_on_constraints_grouping_variables!(
+            connection,
+            constraints[table_name],
+            variables[:start_up],
+            :start_up,
+            workspace,
+            agg_strategy = :unique_sum,
+        )
+        @timeit to "attach shut_down expression to $table_name" attach_expression_on_constraints_grouping_variables!(
+            connection,
+            constraints[table_name],
+            variables[:shut_down],
+            :shut_down,
+            workspace,
+            agg_strategy = :unique_sum,
+        )
     end
     return
 end

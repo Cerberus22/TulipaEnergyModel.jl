@@ -1,0 +1,5 @@
+asset,year,rep_period,specification,partition
+ccgt,2030,1,uniform,3
+ccgt,2030,2,uniform,3
+smr,2030,1,uniform,6
+smr,2030,2,uniform,6
