@@ -67,7 +67,7 @@ function create_model(
     constraints,
     profiles,
     model_parameters;
-    optimizer = Gurobi.Optimizer,
+    optimizer = HiGHS.Optimizer,
     optimizer_parameters = default_parameters(optimizer),
     model_file_name = "",
     enable_names = true,
