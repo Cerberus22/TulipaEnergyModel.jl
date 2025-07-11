@@ -12,78 +12,50 @@ function add_start_up_and_shut_down_lower_bound_constraints!(
     expressions,
     constraints,
 )
-    let table_name_su = :start_up_lower_bound,
-        cons_su = constraints[:start_up_lower_bound],
-        table_name_sd = :shut_down_lower_bound,
-        cons_sd = constraints[:shut_down_lower_bound]
-
-        startup_container = []
-        shutdown_container = []
-        units_on_now_container = []
-        last_asset = nothing
-        last_rep_period = -1
-        for (i, (ind, su, sd, uo)) in enumerate(
-            zip(
-                variables[:units_on].indices,
-                variables[:start_up].container,
-                variables[:shut_down].container,
-                variables[:units_on].container,
-            ),
-        )
-            if (ind.asset == last_asset && ind.rep_period == last_rep_period)
-                push!(startup_container, su)
-                push!(shutdown_container, sd)
-                push!(units_on_now_container, uo)
-            end
-            last_asset = ind.asset
-            last_rep_period = ind.rep_period
-        end
-
-        units_on_prev_container = []
-
-        indices = collect(variables[:units_on].indices)
-        container = collect(variables[:units_on].container)
-
-        for i in (1:(length(indices)-1))
-            if indices[i].asset == indices[i+1].asset &&
-               indices[i].rep_period == indices[i+1].rep_period
-                push!(units_on_prev_container, container[i])
-            end
-        end
+    let table_name = :start_up_lower_bound, cons = constraints[table_name]
+        start_up = variables[:start_up].container
+        units_on = variables[:units_on].container
 
         attach_constraint!(
             model,
-            cons_su,
-            table_name_su,
+            cons,
+            table_name,
             [
-                @constraint(
-                    model,
-                    units_on_now - units_on_prev <= start_up,
-                    base_name = "$table_name_su[$(row.asset),$(row.year),$(row.rep_period),$(row.time_block_start):$(row.time_block_end)]"
-                ) for (row, start_up, units_on_now, units_on_prev) in zip(
-                    cons_su.indices,
-                    startup_container,
-                    units_on_now_container,
-                    units_on_prev_container,
-                )
+                begin
+                    if row.time_block_start == 1
+                        @constraint(model, 0 == 0)
+                    else
+                        @constraint(
+                            model,
+                            units_on[row.id] - units_on[row.id-1] <= start_up[row.id],
+                            base_name = "$table_name[$(row.asset),$(row.year),$(row.rep_period),$(row.time_block_start):$(row.time_block_end)]"
+                        )
+                    end
+                end for row in cons.indices
             ],
         )
+    end
+
+    let table_name = :shut_down_lower_bound, cons = constraints[table_name]
+        shut_down = variables[:shut_down].container
+        units_on = variables[:units_on].container
 
         attach_constraint!(
             model,
-            cons_sd,
-            table_name_sd,
+            cons,
+            table_name,
             [
-                @constraint(
-                    model,
-                    units_on_prev - units_on_now <= shut_down,
-                    base_name = "$table_name_sd[$(row.asset),$(row.year),$(row.rep_period),$(row.time_block_start):$(row.time_block_end)]"
-                ) for (row, shut_down, units_on_now, units_on_prev) in zip(
-                    cons_su.indices,
-                    shutdown_container,
-                    units_on_now_container,
-                    units_on_prev_container,
-                )
+                begin
+                    if row.time_block_start == 1
+                        @constraint(model, 0 == 0)
+                    else
+                        @constraint(
+                            model,
+                            units_on[row.id-1] - units_on[row.id] <= shut_down[row.id],
+                            base_name = "$table_name[$(row.asset),$(row.year),$(row.rep_period),$(row.time_block_start):$(row.time_block_end)]"
+                        )
+                    end
+                end for row in cons.indices
             ],
         )
     end

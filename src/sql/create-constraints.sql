@@ -888,40 +888,17 @@ with sorted as (
         t_high.year,
         t_high.rep_period,
         t_high.time_block_start
-),
-numbered as (
-    select
-        sorted.*,
-        row_number() over (
-        partition by sorted.asset, sorted.rep_period, sorted.year
-        order by
-            sorted.asset,
-            sorted.year,
-            sorted.rep_period,
-            sorted.time_block_start
-        ) as rn
-    from
-        sorted
-),
-sub as (
-    select
-        numbered.*
-    from
-        numbered
-    where
-        rn > 1
-    order by
-        numbered.asset,
-        numbered.year,
-        numbered.rep_period,
-        numbered.time_block_start
-
 )
 select
     nextval('id') as id,
-    sub.*
+    sorted.*
 from
-    sub
+    sorted
+order by
+    sorted.asset,
+    sorted.year,
+    sorted.rep_period,
+    sorted.time_block_start
 ;
 
 drop sequence id
@@ -956,40 +933,17 @@ with sorted as (
         t_high.year,
         t_high.rep_period,
         t_high.time_block_start
-),
-numbered as (
-    select
-        sorted.*,
-        row_number() over (
-        partition by sorted.asset, sorted.rep_period, sorted.year
-        order by
-            sorted.asset,
-            sorted.year,
-            sorted.rep_period,
-            sorted.time_block_start
-        ) as rn
-    from
-        sorted
-),
-sub as (
-    select
-        numbered.*
-    from
-        numbered
-    where
-        rn > 1
-    order by
-        numbered.asset,
-        numbered.year,
-        numbered.rep_period,
-        numbered.time_block_start
-
 )
 select
     nextval('id') as id,
-    sub.*
+    sorted.*
 from
-    sub
+    sorted
+order by
+    sorted.asset,
+    sorted.year,
+    sorted.rep_period,
+    sorted.time_block_start
 ;
 
 drop sequence id
