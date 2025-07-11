@@ -232,9 +232,6 @@ function _append_data_to_trajectory(connection, table_name)
             asset.capacity          AS capacity,
             profiles.profile_name   AS profile_name
         FROM cons_$table_name AS cons
-        LEFT JOIN expr_available_asset_units_simple_method AS expr_avail
-            ON cons.asset = expr_avail.asset
-            AND cons.year = expr_avail.milestone_year
         LEFT JOIN asset AS asset
             ON cons.asset = asset.asset
         LEFT JOIN assets_profiles as profiles
