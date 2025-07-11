@@ -226,7 +226,7 @@ from
 where
     asset.type in ('producer', 'conversion')
     and asset.unit_commitment
-    and asset.unit_commitment_method in ('basic', 'min_up_down')
+    and asset.unit_commitment_method in ('basic', 'susd_ramping_basic', 'susd_ramping_tight', 'su_sd_ramp_with_vars', 'min_up_down', 'su-sd-cons-eq-7', 'su-sd-cons-eq-9')
 ;
 
 drop sequence id
@@ -245,7 +245,7 @@ from
 where
     asset.type in ('producer', 'conversion')
     and asset.unit_commitment
-    and asset.unit_commitment_method in ('basic', 'susd_ramping_basic', 'susd_ramping_tight', 'su_sd_ramp_with_vars', 'min_up_down', 'su-sd-cons-eq-7', 'su-sd-cons-eq-9')
+    and asset.unit_commitment_method in ('basic', 'susd_ramping_basic', 'susd_ramping_tight', 'su_sd_ramp_with_vars', 'trajectory', 'min_up_down', 'su-sd-cons-eq-7', 'su-sd-cons-eq-9', 'all-with-vars', 'all-no-vars')
 ;
 
 drop sequence id
@@ -265,7 +265,7 @@ where
     asset.type in ('producer', 'conversion')
     and asset.ramping
     and asset.unit_commitment
-    and asset.unit_commitment_method in ('basic', 'su_sd_ramp_with_vars', 'trajectory', 'susd_ramping_basic', 'susd_ramping_tight', 'su-sd-cons-eq-7', 'su-sd-cons-eq-9')
+    and asset.unit_commitment_method in ('basic', 'susd_ramping_basic', 'susd_ramping_tight', 'su_sd_ramp_with_vars', 'trajectory', 'min_up_down', 'su-sd-cons-eq-7', 'su-sd-cons-eq-9', 'all-with-vars', 'all-no-vars')
 ;
 
 drop sequence id
@@ -285,8 +285,7 @@ where
     asset.type in ('producer', 'conversion')
     and asset.ramping
     and asset.unit_commitment
-    and (asset.unit_commitment_method = 'susd_ramping_basic' or asset.unit_commitment_method = 'susd_ramping_tight')
-
+    and asset.unit_commitment_method in ('susd_ramping_basic', 'susd_ramping_tight', 'all-no-vars')
 ;
 
 drop sequence id
@@ -306,8 +305,7 @@ where
     asset.type in ('producer', 'conversion')
     and asset.ramping
     and asset.unit_commitment
-    and (asset.unit_commitment_method = 'susd_ramping_basic' or asset.unit_commitment_method = 'susd_ramping_tight')
-
+    and asset.unit_commitment_method in ('susd_ramping_basic', 'susd_ramping_tight', 'all-no-vars')
 ;
 
 drop sequence id
@@ -327,7 +325,7 @@ where
     asset.type in ('producer', 'conversion')
     and asset.ramping
     and asset.unit_commitment
-    and (asset.unit_commitment_method = 'susd_ramping_tight')
+    and asset.unit_commitment_method in ('susd_ramping_tight', 'all-no-vars')
 ;
 
 drop sequence id
@@ -347,7 +345,7 @@ where
     asset.type in ('producer', 'conversion')
     and asset.ramping
     and asset.unit_commitment
-    and (asset.unit_commitment_method = 'susd_ramping_tight')
+    and asset.unit_commitment_method in ('susd_ramping_tight', 'all-no-vars')
 ;
 
 drop sequence id
@@ -367,9 +365,7 @@ where
     asset.type in ('producer', 'storage', 'conversion')
     and asset.ramping
     and not asset.unit_commitment
-    and asset.unit_commitment_method != 'basic'
-    and asset.unit_commitment_method != 'susd_ramping_basic'
-    and asset.unit_commitment_method != 'su_sd_ramp_with_vars'
+    and asset.unit_commitment_method not in ('basic', 'susd_ramping_basic', 'su_sd_ramp_with_vars', 'trajectory', 'min_up_down', 'su-sd-cons-eq-7', 'su-sd-cons-eq-9', 'all-with-vars', 'all-no-vars')
 ;
 
 create table cons_balance_storage_rep_period as
@@ -519,7 +515,7 @@ from
 where
     asset.type in ('producer', 'conversion')
     and asset.unit_commitment = true
-    and asset.unit_commitment_method in ('trajectory', 'su_sd_ramp_with_vars', 'su-sd-cons-eq-7')
+    and asset.unit_commitment_method in ('trajectory', 'su_sd_ramp_with_vars', 'su-sd-cons-eq-7', 'all-with-vars')
 order by
     t_high.asset,
     t_high.year,
@@ -560,7 +556,7 @@ from
 where
     asset.type in ('producer', 'conversion')
     and asset.unit_commitment = true
-    and asset.unit_commitment_method in ('su-sd-cons-eq-7', 'su_sd_ramp_with_vars')
+    and asset.unit_commitment_method in ('su-sd-cons-eq-7', 'su_sd_ramp_with_vars', 'all-with-vars')
     and asset.investment_method in ('simple', 'none')
 order by
     t_high.asset,
@@ -602,7 +598,7 @@ from
 where
     asset.type in ('producer', 'conversion')
     and asset.unit_commitment = true
-    and asset.unit_commitment_method in ('su_sd_ramp_with_vars', 'su-sd-cons-eq-7')
+    and asset.unit_commitment_method in ('su_sd_ramp_with_vars', 'su-sd-cons-eq-7', 'all-with-vars')
     and asset.investment_method = 'compact'
 order by
     t_high.asset,
@@ -641,7 +637,7 @@ with sorted as (
     where
         asset.type in ('producer', 'conversion')
         and asset.unit_commitment = true
-        and asset.unit_commitment_method in ('su_sd_ramp_with_vars', 'trajectory', 'min_up_down', 'su-sd-cons-eq-7')
+        and asset.unit_commitment_method in ('su_sd_ramp_with_vars', 'trajectory', 'min_up_down', 'su-sd-cons-eq-7', 'all-with-vars')
     order by
         t_high.asset,
         t_high.year,
@@ -687,7 +683,7 @@ from
 where
     asset.type in ('producer', 'conversion')
     and asset.unit_commitment = true
-    and asset.unit_commitment_method in ('min_up_down')
+    and asset.unit_commitment_method in ('min_up_down', 'all-with-vars', 'all-no-vars')
 order by
     t_high.asset,
     t_high.year,
@@ -726,7 +722,7 @@ from
 where
     asset.type in ('producer', 'conversion')
     and asset.unit_commitment = true
-    and asset.unit_commitment_method in ('min_up_down', 'trajectory')
+    and asset.unit_commitment_method in ('min_up_down', 'trajectory', 'all-with-vars', 'all-no-vars')
     and asset.investment_method in ('simple', 'none')
 order by
     t_high.asset,
@@ -766,7 +762,7 @@ from
 where
     asset.type in ('producer', 'conversion')
     and asset.unit_commitment = true
-    and asset.unit_commitment_method in ('min_up_down', 'trajectory')
+    and asset.unit_commitment_method in ('min_up_down', 'trajectory', 'all-with-vars', 'all-no-vars')
     and asset.investment_method = 'compact'
 order by
     t_high.asset,
@@ -802,7 +798,7 @@ with sorted as (
     where
         asset.type in ('producer', 'conversion')
         and asset.unit_commitment
-        and (asset.unit_commitment_method = 'trajectory')
+        and asset.unit_commitment_method in ('trajectory', 'all-with-vars', 'all-no-vars')
     order by
         t_high.asset,
         t_high.year,
@@ -843,7 +839,7 @@ where
     asset.type in ('producer', 'conversion')
     and asset.ramping
     and asset.unit_commitment
-    and (asset.unit_commitment_method = 'su_sd_ramp_with_vars')
+    and asset.unit_commitment_method in ('su_sd_ramp_with_vars', 'all-with-vars')
 order by
     t_high.asset,
     t_high.year,
@@ -897,7 +893,7 @@ where
     asset.type in ('producer', 'conversion')
     and asset.ramping
     and asset.unit_commitment
-    and (asset.unit_commitment_method = 'su_sd_ramp_with_vars')
+    and asset.unit_commitment_method in ('su_sd_ramp_with_vars', 'all-with-vars')
 order by
     t_high.asset,
     t_high.year,
