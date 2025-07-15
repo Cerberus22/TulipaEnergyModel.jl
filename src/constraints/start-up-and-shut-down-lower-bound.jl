@@ -13,8 +13,8 @@ function add_start_up_and_shut_down_lower_bound_constraints!(
     constraints,
 )
     let table_name = :start_up_lower_bound, cons = constraints[table_name]
-        start_up = variables[:start_up].container
-        units_on = variables[:units_on].container
+        units_on = cons.expressions[:units_on]
+        start_up = cons.expressions[:start_up]
 
         attach_constraint!(
             model,
@@ -37,8 +37,8 @@ function add_start_up_and_shut_down_lower_bound_constraints!(
     end
 
     let table_name = :shut_down_lower_bound, cons = constraints[table_name]
-        shut_down = variables[:shut_down].container
-        units_on = variables[:units_on].container
+        shut_down = cons.expressions[:shut_down]
+        units_on = cons.expressions[:units_on]
 
         attach_constraint!(
             model,

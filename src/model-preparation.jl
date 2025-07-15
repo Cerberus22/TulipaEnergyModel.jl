@@ -615,6 +615,8 @@ function add_expressions_to_constraints!(connection, variables, constraints)
         :sd_ramp_vars_flow_upper_bound,
         :su_sd_ramp_vars_flow_with_high_uptime,
         :su_sd_eq_units_on_diff,
+        :start_up_lower_bound,
+        :shut_down_lower_bound,
     )
         @timeit to "attach units_on expression to $table_name" attach_expression_on_constraints_grouping_variables!(
             connection,
