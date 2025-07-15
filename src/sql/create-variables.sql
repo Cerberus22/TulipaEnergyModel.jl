@@ -81,7 +81,7 @@ with sub as (
     where
         asset.type in ('producer', 'conversion')
         and asset.unit_commitment = true
-        and asset.unit_commitment_method in ('min_up_down', 'trajectory', 'su_sd_ramp_with_vars', 'su-sd-cons-eq-7', 'su-sd-cons-eq-9')
+        and asset.unit_commitment_method in ('min_up_down', 'trajectory', 'su_sd_ramp_with_vars', 'su-sd-cons-eq-7', 'su-sd-cons-eq-9', 'all-with-vars', 'all-no-vars')
     order by
         t_high.asset,
         t_high.year,
@@ -127,7 +127,7 @@ with sub as (
     where
         asset.type in ('producer', 'conversion')
         and asset.unit_commitment = true
-        and asset.unit_commitment_method in ('min_up_down', 'trajectory', 'su_sd_ramp_with_vars', 'su-sd-cons-eq-7', 'su-sd-cons-eq-9')
+        and asset.unit_commitment_method in ('min_up_down', 'trajectory', 'su_sd_ramp_with_vars', 'su-sd-cons-eq-7', 'su-sd-cons-eq-9', 'all-with-vars', 'all-no-vars')
     order by
         t_high.asset,
         t_high.year,

@@ -1,0 +1,8 @@
+asset,type,group,capacity,min_operating_point,investment_method,investment_integer,technical_lifetime,economic_lifetime,discount_rate,consumer_balance_sense,capacity_storage_energy,is_seasonal,use_binary_storage_method,unit_commitment,unit_commitment_method,unit_commitment_integer,ramping,storage_method_energy,energy_to_power_ratio,investment_integer_storage_energy,max_ramp_up,max_ramp_down,start_up_cost,shut_down_cost,start_trajectory,shut_trajectory,max_su_ramp,max_sd_ramp,minimum_up_time,minimum_down_time
+battery,storage,,50.0,,simple,True,30,10,0.05,,100.0,False,,False,,False,False,True,0.0,False,,,,,,,,,,
+ccgt,producer,,400.0,0.2,none,True,25,10,0.05,,0.0,False,,True,all-with-vars,True,True,False,0.0,False,0.01,0.02,10,20,"5,10","10,5",0.05,0.04,2,3
+demand,consumer,,0.0,,none,False,15,10,0.05,,0.0,False,,False,,False,False,False,0.0,False,,,,,,,,,,
+ens,producer,,1115.0,,none,False,15,10,0.05,,0.0,False,,False,,False,False,False,0.0,False,,,,,,,,,,
+ocgt,producer,,100.0,0.2,simple,True,15,10,0.05,,0.0,False,,True,all-with-vars,True,True,False,0.0,False,0.015,0.025,15,25,"7,12","12,7",0.055,0.045,4,5
+solar,producer,,10.0,,simple,True,15,10,0.05,,0.0,False,,False,,False,False,False,0.0,False,,,,,,,,,,
+wind,producer,,50.0,,compact,True,30,10,0.05,,0.0,False,,False,,False,False,False,0.0,False,,,,,,,,,,

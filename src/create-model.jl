@@ -220,15 +220,6 @@ function create_model(
         profiles,
     )
 
-    @timeit to "add_su_ramp_vars_flow_diff_constraints!" add_su_ramp_vars_flow_diff_constraints!(
-        connection,
-        model,
-        variables,
-        expressions,
-        constraints,
-        profiles,
-    )
-
     @timeit to "add_minimum_up_time_constraints!" add_minimum_up_time_constraints!(
         connection,
         model,
