@@ -21,26 +21,6 @@ function add_minimum_up_time_constraints!(connection, model, variables, expressi
             end
         end
 
-        # Preprocess
-        start_up_container = []
-        units_on_container = []
-        unique_assets = Set{String}()
-
-        for row in cons.indices
-            push!(unique_assets, row.asset)
-        end
-
-        for (i, v, v2) in zip(
-            variables[:start_up].indices,
-            variables[:start_up].container,
-            variables[:units_on].container,
-        )
-            if i.asset in unique_assets
-                push!(start_up_container, v)
-                push!(units_on_container, v2)
-            end
-        end
-
         start_up_container, units_on_container = _get_correct_su_sd_and_units_on_variables(
             cons.indices,
             variables[:start_up].indices,
