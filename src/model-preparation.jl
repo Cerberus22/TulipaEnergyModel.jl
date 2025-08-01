@@ -608,7 +608,6 @@ function add_expressions_to_constraints!(connection, variables, constraints)
         :su_ramping_tight,
         :sd_ramping_tight,
         :trajectory,
-        :su_sd_eq_units_on_diff,
         :su_ramp_vars_flow_diff,
         :sd_ramp_vars_flow_diff,
         :su_ramp_vars_flow_upper_bound,
