@@ -13,8 +13,12 @@ function add_start_up_and_shut_down_lower_bound_constraints!(
     constraints,
 )
     let table_name = :start_up_lower_bound, cons = constraints[table_name]
-        units_on = cons.expressions[:units_on]
-        start_up = cons.expressions[:start_up]
+        units_on = variables[:units_on].container
+        start_up = variables[:start_up].container
+
+        indices = _append_variable_ids(connection, table_name, ["units_on", "start_up"])
+
+        print(indices)
 
         attach_constraint!(
             model,
@@ -27,18 +31,21 @@ function add_start_up_and_shut_down_lower_bound_constraints!(
                     else
                         @constraint(
                             model,
-                            units_on[row.id] - units_on[row.id-1] <= start_up[row.id],
+                            units_on[row.units_on_id] - units_on[row.units_on_id-1] <=
+                            start_up[row.start_up_id],
                             base_name = "$table_name[$(row.asset),$(row.year),$(row.rep_period),$(row.time_block_start):$(row.time_block_end)]"
                         )
                     end
-                end for row in cons.indices
+                end for row in indices
             ],
         )
     end
 
     let table_name = :shut_down_lower_bound, cons = constraints[table_name]
-        shut_down = cons.expressions[:shut_down]
-        units_on = cons.expressions[:units_on]
+        units_on = variables[:units_on].container
+        shut_down = variables[:shut_down].container
+
+        indices = _append_variable_ids(connection, table_name, ["units_on", "shut_down"])
 
         attach_constraint!(
             model,
@@ -51,11 +58,12 @@ function add_start_up_and_shut_down_lower_bound_constraints!(
                     else
                         @constraint(
                             model,
-                            units_on[row.id-1] - units_on[row.id] <= shut_down[row.id],
+                            units_on[row.units_on_id-1] - units_on[row.units_on_id] <=
+                            shut_down[row.shut_down_id],
                             base_name = "$table_name[$(row.asset),$(row.year),$(row.rep_period),$(row.time_block_start):$(row.time_block_end)]"
                         )
                     end
-                end for row in cons.indices
+                end for row in indices
             ],
         )
     end
