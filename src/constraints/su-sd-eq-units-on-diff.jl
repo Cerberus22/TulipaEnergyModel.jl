@@ -13,9 +13,12 @@ function add_su_sd_eq_units_on_diff_constraints!(
     constraints,
 )
     let table_name = :su_sd_eq_units_on_diff, cons = constraints[:su_sd_eq_units_on_diff]
-        units_on = cons.expressions[:units_on]
-        start_up = cons.expressions[:start_up]
-        shut_down = cons.expressions[:shut_down]
+        units_on = variables[:units_on].container
+        start_up = variables[:start_up].container
+        shut_down = variables[:shut_down].container
+
+        indices =
+            _append_variable_ids(connection, table_name, ["units_on", "start_up", "shut_down"])
 
         attach_constraint!(
             model,
@@ -28,12 +31,12 @@ function add_su_sd_eq_units_on_diff_constraints!(
                     else
                         @constraint(
                             model,
-                            units_on[row.id] - units_on[row.id-1] ==
-                            start_up[row.id] - shut_down[row.id],
+                            units_on[row.units_on_id] - units_on[row.units_on_id-1] ==
+                            start_up[row.start_up_id] - shut_down[row.shut_down_id],
                             base_name = "$table_name[$(row.asset),$(row.year),$(row.rep_period),$(row.time_block_start):$(row.time_block_end)]"
                         )
                     end
-                end for row in cons.indices
+                end for row in indices
             ],
         )
     end

@@ -18,8 +18,6 @@ function add_start_up_and_shut_down_lower_bound_constraints!(
 
         indices = _append_variable_ids(connection, table_name, ["units_on", "start_up"])
 
-        print(indices)
-
         attach_constraint!(
             model,
             cons,
