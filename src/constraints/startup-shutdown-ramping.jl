@@ -194,22 +194,19 @@ function add_su_sd_ramping_constraints_tight!(
                 elseif row.max_su_ramp + row.max_ramp_up * (min_outgoing_flow_duration - 1) > 1
                     @constraint(model, 0 == 0) # Do not produce the constraint.
                 else
+                    start_up_avg = _calculate_average_su_sd_ramping_parameters(
+                        row.max_su_ramp,
+                        row.max_ramp_up,
+                        profile_times_capacity[table_name][row.id],
+                        min_outgoing_flow_duration,
+                    )
+
                     @constraint(
                         model,
                         cons.expressions[:outgoing][row.id] ≤
-                        (
-                            row.max_su_ramp * profile_times_capacity[table_name][row.id] +
-                            row.max_ramp_up *
-                            profile_times_capacity[table_name][row.id] *
-                            (min_outgoing_flow_duration - 1)
-                        ) * units_on[row.id] +
-                        (
-                            profile_times_capacity[table_name][row.id] -
-                            row.max_su_ramp * profile_times_capacity[table_name][row.id] -
-                            row.max_ramp_up *
-                            profile_times_capacity[table_name][row.id] *
-                            (min_outgoing_flow_duration - 1)
-                        ) * units_on[row.id-1],
+                        (start_up_avg * units_on[row.id]) +
+                        (profile_times_capacity[table_name][row.id] - start_up_avg) *
+                        units_on[row.id-1],
                         base_name = "su_ramping_tight[$(row.asset),$(row.year),$(row.rep_period),$(row.time_block_start):$(row.time_block_end)]"
                     )
                 end for (row, min_outgoing_flow_duration) in
@@ -234,22 +231,19 @@ function add_su_sd_ramping_constraints_tight!(
                        (cons.coefficients[:min_outgoing_flow_duration][row.id-1] - 1) > 1
                     @constraint(model, 0 == 0) # Do not produce the constraint.
                 else
+                    shut_down_avg = _calculate_average_su_sd_ramping_parameters(
+                        row.max_sd_ramp,
+                        row.max_ramp_down,
+                        profile_times_capacity[table_name][row.id-1],
+                        cons.coefficients[:min_outgoing_flow_duration][row.id-1],
+                    )
+
                     @constraint(
                         model,
                         cons.expressions[:outgoing][row.id-1] ≤
-                        (
-                            row.max_sd_ramp * profile_times_capacity[table_name][row.id-1] +
-                            row.max_ramp_down *
-                            profile_times_capacity[table_name][row.id-1] *
-                            (cons.coefficients[:min_outgoing_flow_duration][row.id-1] - 1)
-                        ) * units_on[row.id-1] +
-                        (
-                            profile_times_capacity[table_name][row.id-1] -
-                            row.max_sd_ramp * profile_times_capacity[table_name][row.id-1] -
-                            row.max_ramp_down *
-                            profile_times_capacity[table_name][row.id-1] *
-                            (cons.coefficients[:min_outgoing_flow_duration][row.id-1] - 1)
-                        ) * units_on[row.id],
+                        (shut_down_avg * units_on[row.id-1]) +
+                        (profile_times_capacity[table_name][row.id-1] - shut_down_avg) *
+                        units_on[row.id],
                         base_name = "sd_ramping_tight[$(row.asset),$(row.year),$(row.rep_period),$(row.time_block_start):$(row.time_block_end)]"
                     )
                 end for row in indices
