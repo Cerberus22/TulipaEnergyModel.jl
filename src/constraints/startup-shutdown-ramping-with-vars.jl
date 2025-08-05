@@ -62,20 +62,14 @@ function add_su_sd_ramping_with_vars_constraints!(
                 if row.time_block_start == 1
                     @constraint(model, 0 == 0)
                 else
-                    p_start_up_ramp = row.max_su_ramp * profile_times_capacity[table_name][row.id]
-                    p_ramp_up = row.max_ramp_up * profile_times_capacity[table_name][row.id]
-
                     p_min = row.min_operating_point * profile_times_capacity[table_name][row.id]
-                    p_max = profile_times_capacity[table_name][row.id]
 
-                    average_up =
-                        sum([
-                            min(p_max, p_start_up_ramp + p_ramp_up * i) for
-                            i in 0:(duration[row.id]-1)
-                        ]) / duration[row.id]
-
-                    average_up_prime =
-                        sum([min(p_max, p_ramp_up * i) for i in 1:duration[row.id]]) / duration[row.id]
+                    average_up, average_up_prime = _calculate_average_ramping_parameters(
+                        row.max_su_ramp,
+                        row.max_ramp_up,
+                        profile_times_capacity[table_name][row.id],
+                        duration[row.id],
+                    )
 
                     @constraint(
                         model,
@@ -104,21 +98,14 @@ function add_su_sd_ramping_with_vars_constraints!(
                 if row.time_block_start == 1
                     @constraint(model, 0 == 0)
                 else
-                    p_shut_down_ramp =
-                        row.max_sd_ramp * profile_times_capacity[table_name][row.id-1]
-                    p_ramp_down = row.max_ramp_down * profile_times_capacity[table_name][row.id-1]
-
                     p_min = row.min_operating_point * profile_times_capacity[table_name][row.id-1]
-                    p_max = profile_times_capacity[table_name][row.id-1]
 
-                    average_down =
-                        sum([
-                            min(p_max, p_shut_down_ramp + p_ramp_down * i) for
-                            i in 0:(duration[row.id-1]-1)
-                        ]) / duration[row.id-1]
-
-                    average_down_prime =
-                        sum([min(p_max, p_ramp_down * i) for i in 1:duration[row.id-1]]) / duration[row.id-1]
+                    average_down, average_down_prime = _calculate_average_ramping_parameters(
+                        row.max_sd_ramp,
+                        row.max_ramp_down,
+                        profile_times_capacity[table_name][row.id],
+                        duration[row.id],
+                    )
 
                     @constraint(
                         model,
@@ -152,26 +139,12 @@ function add_su_sd_ramping_with_vars_constraints!(
                 )
                     @constraint(model, 0 == 0)
                 else
-                    p_start_up_ramp =
-                        row.max_su_ramp * profile_times_capacity[table_name][row.id-1]
-                    p_shut_down_ramp =
-                        row.max_sd_ramp * profile_times_capacity[table_name][row.id-1]
-
-                    p_ramp_up = row.max_ramp_up * profile_times_capacity[table_name][row.id-1]
-                    p_ramp_down = row.max_ramp_down * profile_times_capacity[table_name][row.id-1]
-
-                    p_max = profile_times_capacity[table_name][row.id-1]
-
-                    average_up =
-                        sum([
-                            min(p_max, p_start_up_ramp + p_ramp_up * i) for
-                            i in 0:(duration[row.id-1]-1)
-                        ]) / duration[row.id-1]
-                    average_down =
-                        sum([
-                            min(p_max, p_shut_down_ramp + p_ramp_down * i) for
-                            i in 0:(duration[row.id-1]-1)
-                        ]) / duration[row.id-1]
+                    average_up, average_up_prime = _calculate_average_ramping_parameters(
+                        row.max_su_ramp,
+                        row.max_ramp_up,
+                        profile_times_capacity[table_name][row.id],
+                        duration[row.id],
+                    )
 
                     @constraint(
                         model,
@@ -204,26 +177,12 @@ function add_su_sd_ramping_with_vars_constraints!(
                 )
                     @constraint(model, 0 == 0)
                 else
-                    p_start_up_ramp =
-                        row.max_su_ramp * profile_times_capacity[table_name][row.id-1]
-                    p_shut_down_ramp =
-                        row.max_sd_ramp * profile_times_capacity[table_name][row.id-1]
-
-                    p_ramp_up = row.max_ramp_up * profile_times_capacity[table_name][row.id-1]
-                    p_ramp_down = row.max_ramp_down * profile_times_capacity[table_name][row.id-1]
-
-                    p_max = profile_times_capacity[table_name][row.id-1]
-
-                    average_up =
-                        sum([
-                            min(p_max, p_start_up_ramp + p_ramp_up * i) for
-                            i in 0:(duration[row.id-1]-1)
-                        ]) / duration[row.id-1]
-                    average_down =
-                        sum([
-                            min(p_max, p_shut_down_ramp + p_ramp_down * i) for
-                            i in 0:(duration[row.id-1]-1)
-                        ]) / duration[row.id-1]
+                    average_down, average_down_prime = _calculate_average_ramping_parameters(
+                        row.max_sd_ramp,
+                        row.max_ramp_down,
+                        profile_times_capacity[table_name][row.id],
+                        duration[row.id],
+                    )
 
                     @constraint(
                         model,
@@ -256,26 +215,21 @@ function add_su_sd_ramping_with_vars_constraints!(
                 )
                     @constraint(model, 0 == 0)
                 else
-                    p_start_up_ramp =
-                        row.max_su_ramp * profile_times_capacity[table_name][row.id-1]
-                    p_shut_down_ramp =
-                        row.max_sd_ramp * profile_times_capacity[table_name][row.id-1]
-
-                    p_ramp_up = row.max_ramp_up * profile_times_capacity[table_name][row.id-1]
-                    p_ramp_down = row.max_ramp_down * profile_times_capacity[table_name][row.id-1]
-
                     p_max = profile_times_capacity[table_name][row.id-1]
 
-                    average_up =
-                        sum([
-                            min(p_max, p_start_up_ramp + p_ramp_up * i) for
-                            i in 0:(duration[row.id-1]-1)
-                        ]) / duration[row.id-1]
-                    average_down =
-                        sum([
-                            min(p_max, p_shut_down_ramp + p_ramp_down * i) for
-                            i in 0:(duration[row.id-1]-1)
-                        ]) / duration[row.id-1]
+                    average_up = _calculate_average_su_sd_ramping_parameters(
+                        row.max_su_ramp,
+                        row.max_ramp_up,
+                        profile_times_capacity[table_name][row.id-1],
+                        duration[row.id-1],
+                    )
+
+                    average_down = _calculate_average_su_sd_ramping_parameters(
+                        row.max_sd_ramp,
+                        row.max_ramp_down,
+                        profile_times_capacity[table_name][row.id-1],
+                        duration[row.id-1],
+                    )
 
                     @constraint(
                         model,
