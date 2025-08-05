@@ -65,16 +65,18 @@ function add_su_sd_ramping_constraints_simple!(
                 elseif cons.expressions[:outgoing][row.id] == cons.expressions[:outgoing][row.id-1]
                     @constraint(model, 0 == 0) # No extra constraint if it is the same flow variable
                 else
+                    start_up_avg = _calculate_average_su_sd_ramping_parameters(
+                        row.max_su_ramp,
+                        row.max_ramp_up,
+                        profile_times_capacity[table_name][row.id],
+                        min_outgoing_flow_duration,
+                    )
+
                     @constraint(
                         model,
                         cons.expressions[:outgoing][row.id] -
                         cons.expressions[:outgoing][row.id-1] ≤
-                        (
-                            row.max_su_ramp * profile_times_capacity[table_name][row.id] +
-                            row.max_ramp_up *
-                            profile_times_capacity[table_name][row.id] *
-                            (min_outgoing_flow_duration - 1)
-                        ) * units_on[row.id] -
+                        (start_up_avg * units_on[row.id]) -
                         (
                             row.max_su_ramp * profile_times_capacity[table_name][row.id] -
                             row.max_ramp_up * profile_times_capacity[table_name][row.id]
@@ -105,16 +107,18 @@ function add_su_sd_ramping_constraints_simple!(
                 elseif cons.expressions[:outgoing][row.id] == cons.expressions[:outgoing][row.id-1]
                     @constraint(model, 0 == 0) # No extra constraint if it is the same flow variable
                 else
+                    shut_down_avg = _calculate_average_su_sd_ramping_parameters(
+                        row.max_sd_ramp,
+                        row.max_ramp_down,
+                        profile_times_capacity[table_name][row.id-1],
+                        cons.coefficients[:min_outgoing_flow_duration][row.id-1],
+                    )
+
                     @constraint(
                         model,
                         cons.expressions[:outgoing][row.id-1] -
                         cons.expressions[:outgoing][row.id] ≤
-                        (
-                            row.max_sd_ramp * profile_times_capacity[table_name][row.id-1] +
-                            row.max_ramp_down *
-                            profile_times_capacity[table_name][row.id-1] *
-                            (cons.coefficients[:min_outgoing_flow_duration][row.id-1] - 1)
-                        ) * units_on[row.id-1] -
+                        shut_down_avg * units_on[row.id-1] -
                         (
                             row.max_sd_ramp * profile_times_capacity[table_name][row.id-1] -
                             row.max_ramp_down * profile_times_capacity[table_name][row.id-1]
