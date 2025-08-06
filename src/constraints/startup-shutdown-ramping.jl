@@ -60,8 +60,6 @@ function add_su_sd_ramping_constraints_simple!(
             [
                 if row.time_block_start == 1
                     @constraint(model, 0 == 0) # Placeholder for case k = 1
-                elseif row.max_su_ramp + row.max_ramp_up * (min_outgoing_flow_duration - 1) > 1
-                    @constraint(model, 0 == 0) # Do not produce the constraint.
                 elseif cons.expressions[:outgoing][row.id] == cons.expressions[:outgoing][row.id-1]
                     @constraint(model, 0 == 0) # No extra constraint if it is the same flow variable
                 else
@@ -100,10 +98,6 @@ function add_su_sd_ramping_constraints_simple!(
             [
                 if row.time_block_start == 1
                     @constraint(model, 0 == 0) # Placeholder for case k = 1
-                elseif row.max_sd_ramp +
-                       row.max_ramp_down *
-                       (cons.coefficients[:min_outgoing_flow_duration][row.id-1] - 1) > 1
-                    @constraint(model, 0 == 0) # Do not produce the constraint.
                 elseif cons.expressions[:outgoing][row.id] == cons.expressions[:outgoing][row.id-1]
                     @constraint(model, 0 == 0) # No extra constraint if it is the same flow variable
                 else
@@ -191,8 +185,6 @@ function add_su_sd_ramping_constraints_tight!(
             [
                 if row.time_block_start == 1
                     @constraint(model, 0 == 0) # Placeholder for case k = 1
-                elseif row.max_su_ramp + row.max_ramp_up * (min_outgoing_flow_duration - 1) > 1
-                    @constraint(model, 0 == 0) # Do not produce the constraint.
                 else
                     start_up_avg = _calculate_average_su_sd_ramping_parameters(
                         row.max_su_ramp,
@@ -226,10 +218,6 @@ function add_su_sd_ramping_constraints_tight!(
             [
                 if row.time_block_start == 1
                     @constraint(model, 0 == 0) # Placeholder for case k = 1
-                elseif row.max_sd_ramp +
-                       row.max_ramp_down *
-                       (cons.coefficients[:min_outgoing_flow_duration][row.id-1] - 1) > 1
-                    @constraint(model, 0 == 0) # Do not produce the constraint.
                 else
                     shut_down_avg = _calculate_average_su_sd_ramping_parameters(
                         row.max_sd_ramp,
