@@ -274,6 +274,26 @@ drop sequence id
 create sequence id start 1
 ;
 
+create table cons_max_ramp_with_unit_commitment_and_averages as
+select
+    nextval('id') as id,
+    t_high.*
+from
+    t_highest_assets_and_out_flows as t_high
+    left join asset on t_high.asset = asset.asset
+where
+    asset.type in ('producer', 'conversion')
+    and asset.ramping
+    and asset.unit_commitment
+    and asset.unit_commitment_method in ('ramping_with_averages')
+;
+
+drop sequence id
+;
+
+create sequence id start 1
+;
+
 create table cons_su_ramping_simple as
 select
     nextval('id') as id,
