@@ -151,7 +151,7 @@ function _append_variable_ids(connection, constraint_table_name, variables_to_ap
 end
 
 """
-    _append_variable_ids(
+    _calculate_average_ramping_parameters(
         max_su_ramp,
         max_ramp_up,
         profile_times_capacity,
@@ -180,7 +180,7 @@ function _calculate_average_ramping_parameters(
 end
 
 """
-    _append_variable_ids(
+    _calculate_average_su_sd_ramping_parameters(
         max_su_ramp,
         max_ramp_up,
         profile_times_capacity,
@@ -204,4 +204,23 @@ function _calculate_average_su_sd_ramping_parameters(
         sum([min(p_max, p_su_sd_ramp + p_ramp_up_down * i) for i in 0:(duration-1)]) / duration
 
     return average_su_sd
+end
+
+"""
+    _calculate_average_su_sd_ramping_parameters(
+        max_ramp_up,
+        profile_times_capacity,
+        duration,
+    )
+
+Calculate the average SU/SD ramping parameters.
+"""
+function _calculate_average_ramping_parameters(max_ramp_up_down, profile_times_capacity, duration)
+    p_ramp_up_down = max_ramp_up_down * profile_times_capacity
+
+    p_max = profile_times_capacity
+
+    average_up_down = sum([min(p_max, p_ramp_up_down * i) for i in 1:duration]) / duration
+
+    return average_up_down
 end

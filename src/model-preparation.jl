@@ -556,6 +556,7 @@ function add_expressions_to_constraints!(connection, variables, constraints)
     for table_name in (
         :min_output_flow_with_unit_commitment,
         :max_ramp_with_unit_commitment,
+        :max_ramp_with_unit_commitment_and_averages,
         :max_ramp_without_unit_commitment,
         :max_output_flow_with_basic_unit_commitment,
         :su_ramping_simple,
@@ -603,6 +604,7 @@ function add_expressions_to_constraints!(connection, variables, constraints)
         :min_output_flow_with_unit_commitment,
         :max_output_flow_with_basic_unit_commitment,
         :max_ramp_with_unit_commitment,
+        :max_ramp_with_unit_commitment_and_averages,
         :su_ramping_simple,
         :sd_ramping_simple,
         :su_ramping_tight,
