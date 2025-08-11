@@ -13,53 +13,30 @@ function add_su_sd_eq_units_on_diff_constraints!(
     constraints,
 )
     let table_name = :su_sd_eq_units_on_diff, cons = constraints[:su_sd_eq_units_on_diff]
-        startup_container = []
-        shutdown_container = []
-        units_on_now_container = []
-        last_asset = nothing
-        for (i, (ind, su, sd, uo)) in enumerate(
-            zip(
-                variables[:units_on].indices,
-                variables[:start_up].container,
-                variables[:shut_down].container,
-                variables[:units_on].container,
-            ),
-        )
-            if (ind.asset == last_asset)
-                push!(startup_container, su)
-                push!(shutdown_container, sd)
-                push!(units_on_now_container, uo)
-            end
-            last_asset = ind.asset
-        end
+        units_on = variables[:units_on].container
+        start_up = variables[:start_up].container
+        shut_down = variables[:shut_down].container
 
-        units_on_prev_container = []
-
-        indices = collect(variables[:units_on].indices)
-        container = collect(variables[:units_on].container)
-
-        for i in (1:(length(indices)-1))
-            if indices[i].asset == indices[i+1].asset
-                push!(units_on_prev_container, container[i])
-            end
-        end
+        indices =
+            _append_variable_ids(connection, table_name, ["units_on", "start_up", "shut_down"])
 
         attach_constraint!(
             model,
             cons,
             table_name,
             [
-                @constraint(
-                    model,
-                    units_on_now - units_on_prev == start_up - shut_down,
-                    base_name = "$table_name[$(row.asset),$(row.year),$(row.rep_period),$(row.time_block_start):$(row.time_block_end)]"
-                ) for (row, start_up, shut_down, units_on_now, units_on_prev) in zip(
-                    cons.indices,
-                    startup_container,
-                    shutdown_container,
-                    units_on_now_container,
-                    units_on_prev_container,
-                )
+                begin
+                    if row.time_block_start == 1
+                        @constraint(model, 0 == 0)
+                    else
+                        @constraint(
+                            model,
+                            units_on[row.units_on_id] - units_on[row.units_on_id-1] ==
+                            start_up[row.start_up_id] - shut_down[row.shut_down_id],
+                            base_name = "$table_name[$(row.asset),$(row.year),$(row.rep_period),$(row.time_block_start):$(row.time_block_end)]"
+                        )
+                    end
+                end for row in indices
             ],
         )
     end

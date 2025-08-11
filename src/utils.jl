@@ -94,3 +94,133 @@ function _create_group_table_if_not_exist!(
 
     return
 end
+
+function read_trajectory(trajectory::String, target::Float64 = 0.0)
+    s = split(trajectory, ",")
+    if s[1] == "linear"
+        len = parse(Int, s[3])
+        step = target / len
+        traj = [(i * step + (step / 2)) for i in 0:len][1:len]
+        if s[2] == "up"
+            return traj
+        elseif s[2] == "down"
+            return reverse!(traj)
+        end
+    else
+        return parse.(Int, split(trajectory, ","))
+    end
+end
+
+"""
+    _append_variable_ids(
+        connection,
+        constraint_table_name,
+        variables_to_append,
+    )
+
+Create table containing all rows of the given constraint (`constraint_table_name`) and their matching variable ids of the variables in `variables_to_append`
+"""
+function _append_variable_ids(connection, constraint_table_name, variables_to_append)
+    query_string = "SELECT
+                       cons.*,
+                   "
+
+    for variable in variables_to_append
+        query_string = query_string * "\n" * "var_$variable.id as $(variable)_id,"
+    end
+
+    query_string = query_string * "\n" * "FROM cons_$constraint_table_name AS cons
+                                            LEFT JOIN asset
+                                            ON cons.asset = asset.asset"
+
+    for variable in variables_to_append
+        variable_table_name = "var_$variable"
+
+        variable_query = "LEFT JOIN $variable_table_name
+                             ON $variable_table_name.asset = cons.asset
+                             AND $variable_table_name.year = cons.year
+                             AND $variable_table_name.rep_period = cons.rep_period
+                             AND $variable_table_name.time_block_start = cons.time_block_start"
+
+        query_string = query_string * "\n" * variable_query
+    end
+
+    query_string = query_string * "\n" * "ORDER BY cons.id"
+
+    return DuckDB.query(connection, query_string)
+end
+
+"""
+    _calculate_average_ramping_parameters(
+        max_su_ramp,
+        max_ramp_up,
+        profile_times_capacity,
+        duration,
+    )
+
+Calculate the average (SU/SD) ramping parameters.
+"""
+function _calculate_average_ramping_parameters(
+    max_su_sd_ramp,
+    max_ramp_up_down,
+    profile_times_capacity,
+    duration,
+)
+    p_su_sd_ramp = max_su_sd_ramp * profile_times_capacity
+    p_ramp_up_down = max_ramp_up_down * profile_times_capacity
+
+    p_max = profile_times_capacity
+
+    average_su_sd =
+        sum([min(p_max, p_su_sd_ramp + p_ramp_up_down * i) for i in 0:(duration-1)]) / duration
+
+    average_up_down = sum([min(p_max, p_ramp_up_down * i) for i in 1:duration]) / duration
+
+    return average_su_sd, average_up_down
+end
+
+"""
+    _calculate_average_su_sd_ramping_parameters(
+        max_su_ramp,
+        max_ramp_up,
+        profile_times_capacity,
+        duration,
+    )
+
+Calculate the average SU/SD ramping parameters.
+"""
+function _calculate_average_su_sd_ramping_parameters(
+    max_su_sd_ramp,
+    max_ramp_up_down,
+    profile_times_capacity,
+    duration,
+)
+    p_su_sd_ramp = max_su_sd_ramp * profile_times_capacity
+    p_ramp_up_down = max_ramp_up_down * profile_times_capacity
+
+    p_max = profile_times_capacity
+
+    average_su_sd =
+        sum([min(p_max, p_su_sd_ramp + p_ramp_up_down * i) for i in 0:(duration-1)]) / duration
+
+    return average_su_sd
+end
+
+"""
+    _calculate_average_su_sd_ramping_parameters(
+        max_ramp_up,
+        profile_times_capacity,
+        duration,
+    )
+
+Calculate the average SU/SD ramping parameters.
+"""
+function _calculate_average_ramping_parameters(max_ramp_up_down, profile_times_capacity, duration)
+    p_ramp_up_down = max_ramp_up_down * profile_times_capacity
+
+    p_max = profile_times_capacity
+
+    average_up_down = sum([min(p_max, p_ramp_up_down * i) for i in 1:duration]) / duration
+
+    return average_up_down
+end
