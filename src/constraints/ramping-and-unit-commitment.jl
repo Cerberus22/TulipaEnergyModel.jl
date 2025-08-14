@@ -20,6 +20,7 @@ function add_ramping_constraints!(connection, model, variables, expressions, con
             :max_ramp_without_unit_commitment,
             :max_ramp_with_unit_commitment,
             :max_output_flow_with_basic_unit_commitment,
+            :max_ramp_with_unit_commitment_and_averages,
         )
     )
 
@@ -42,6 +43,7 @@ function add_ramping_constraints!(connection, model, variables, expressions, con
             :max_ramp_without_unit_commitment,
             :max_ramp_with_unit_commitment,
             :max_output_flow_with_basic_unit_commitment,
+            :max_ramp_with_unit_commitment_and_averages,
         )
     )
 
@@ -50,6 +52,7 @@ function add_ramping_constraints!(connection, model, variables, expressions, con
         :min_output_flow_with_unit_commitment,
         :max_output_flow_with_basic_unit_commitment,
         :max_ramp_with_unit_commitment,
+        :max_ramp_with_unit_commitment_and_averages,
     )
         cons = constraints[table_name]
         indices = indices_dict[table_name]
@@ -200,6 +203,69 @@ function add_ramping_constraints!(connection, model, variables, expressions, con
                         profile_times_capacity[table_name][row.id] *
                         units_on[row.id-1],
                         base_name = "max_ramp_down_with_unit_commitment[$(row.asset),$(row.year),$(row.rep_period),$(row.time_block_start):$(row.time_block_end)]"
+                    )
+                end for (row, min_outgoing_flow_duration) in
+                zip(indices, cons.coefficients[:min_outgoing_flow_duration])
+            ],
+        )
+    end
+
+    let table_name = :max_ramp_with_unit_commitment_and_averages, cons = constraints[table_name]
+        indices = indices_dict[table_name]
+        ## Ramping Constraints with unit commitment
+        # Note: We start ramping constraints from the second timesteps_block
+        # We filter and group the indices per asset and representative period
+        # get the units on column to get easier the id - 1, i.e., the previous one
+        units_on = cons.expressions[:units_on]
+
+        # - Maximum ramp-up rate limit to the flow above the operating point when having unit commitment variables
+        attach_constraint!(
+            model,
+            constraints[table_name],
+            :max_ramp_up_with_unit_commitment_and_averages,
+            [
+                if row.time_block_start == 1
+                    @constraint(model, 0 == 0) # Placeholder for case k = 1
+                else
+                    average_ramp_up = _calculate_average_ramping_parameters(
+                        row.max_ramp_up,
+                        profile_times_capacity[table_name][row.id],
+                        min_outgoing_flow_duration,
+                    )
+
+                    @constraint(
+                        model,
+                        cons.expressions[:flow_above_min_operating_point][row.id] -
+                        cons.expressions[:flow_above_min_operating_point][row.id-1] ≤
+                        average_ramp_up * units_on[row.id],
+                        base_name = "max_ramp_up_with_unit_commitment_and_averages[$(row.asset),$(row.year),$(row.rep_period),$(row.time_block_start):$(row.time_block_end)]"
+                    )
+                end for (row, min_outgoing_flow_duration) in
+                zip(indices, cons.coefficients[:min_outgoing_flow_duration])
+            ],
+        )
+
+        # - Maximum ramp-down rate limit to the flow above the operating point when having unit commitment variables
+        attach_constraint!(
+            model,
+            constraints[table_name],
+            :max_ramp_down_with_unit_commitment_and_averages,
+            [
+                if row.time_block_start == 1
+                    @constraint(model, 0 == 0) # Placeholder for case k = 1
+                else
+                    average_ramp_down = _calculate_average_ramping_parameters(
+                        row.max_ramp_down,
+                        profile_times_capacity[table_name][row.id],
+                        min_outgoing_flow_duration,
+                    )
+
+                    @constraint(
+                        model,
+                        cons.expressions[:flow_above_min_operating_point][row.id] -
+                        cons.expressions[:flow_above_min_operating_point][row.id-1] ≥
+                        -average_ramp_down * units_on[row.id-1],
+                        base_name = "max_ramp_down_with_unit_commitment_and_averages[$(row.asset),$(row.year),$(row.rep_period),$(row.time_block_start):$(row.time_block_end)]"
                     )
                 end for (row, min_outgoing_flow_duration) in
                 zip(indices, cons.coefficients[:min_outgoing_flow_duration])
